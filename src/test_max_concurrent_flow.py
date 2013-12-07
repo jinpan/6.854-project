@@ -21,13 +21,13 @@ from max_concurrent_flow import *
 #on the graph by run_max_concurrent_flow(demand) with whatever demand we want
 class TestCase1():
     def __init__(self):
-        self.edgeList = []
-        self.edgeList.append(Edge("S","1",4))
-        self.edgeList.append(Edge("S","2",3))
-        self.edgeList.append(Edge("1","2",3))
-        self.edgeList.append(Edge("1","T",4))
-        self.edgeList.append(Edge("2","T",5))
-
+        self.edgeList = [
+            Edge("S", "1", 4),
+            Edge("S", "2", 3),
+            Edge("1", "2", 3),
+            Edge("1", "T", 4),
+            Edge("2", "T", 5),
+        ]
 
     def run_max_concurrent_flow(self,demand):
         commodity1 = Commodity("S","T",demand)
@@ -35,23 +35,25 @@ class TestCase1():
 
 
 tc1 = TestCase1()
-print tc1.run_max_concurrent_flow(3) #Beta = 1
-print tc1.run_max_concurrent_flow(.7) #Beta = 10
-print tc1.run_max_concurrent_flow(70) #Beta = .1
+print tc1.run_max_concurrent_flow(7) #Beta = 1
+# print tc1.run_max_concurrent_flow(.7) #Beta = 10
+# print tc1.run_max_concurrent_flow(70) #Beta = .1
+
 
 #Less basic test case: multiple commodities
 
 class TestCase2():
     def __init__(self):
-        self.edgeList = []
-        self.edgeList.append(Edge("S","1",4))
-        self.edgeList.append(Edge("S","4",5))
-        self.edgeList.append(Edge("4","1",1))
-        self.edgeList.append(Edge("1","2",5))
-        self.edgeList.append(Edge("4","5",3))
-        self.edgeList.append(Edge("5","2",2))
-        self.edgeList.append(Edge("2","3",4))
-        self.edgeList.append(Edge("5","6",5))
+        self.edgeList = [
+            Edge("S","1",4),
+            Edge("S","4",5),
+            Edge("4","1",1),
+            Edge("1","2",5),
+            Edge("4","5",3),
+            Edge("5","2",2),
+            Edge("2","3",4),
+            Edge("5","6",5),
+        ]
         
     def run_max_concurrent_flow(self,demand1,demand2):
         peas = Commodity("S","3",demand1)
