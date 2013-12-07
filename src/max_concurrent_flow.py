@@ -45,6 +45,7 @@ def construct_graph(edges):
                    edge.tail,
                    capacity=edge.capacity,
                    length=edge.length)
+        
     return G
 
 
@@ -60,10 +61,11 @@ def run_min_cost_flow(G, commodity, cost=False):
 
     G.node[source][DEMAND_ATTRIBUTE] = -commodity.demand
     G.node[sink][DEMAND_ATTRIBUTE] = commodity.demand
-
     if cost:
         result = min_cost_flow_cost(G, weight=LENGTH_ATTRIBUTE)
+        
     else:
+        
         result = min_cost_flow(G, weight=LENGTH_ATTRIBUTE)
 
     G.node[source][DEMAND_ATTRIBUTE] = 0
@@ -103,7 +105,7 @@ def calculate_epsilon(error):
     '''
     Calculates epsilon such that (1-e) ^ -3 is at most 1+error
     '''
-    return 1 - (1 + error) ** -1./3 - FP_ERROR_MARGIN
+    return 1-1.0/((1+error)**3) -FP_ERROR_MARGIN
 
 
 def calculate_dual_objective(G):
@@ -114,35 +116,38 @@ def calculate_dual_objective(G):
 
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
-            edge = G.edge[head][tail]
-            total += edge[LENGTH_ATTRIBUTE] * edge[CAPACITY_ATTRIBUTE]
-
+            total += edge_dict[LENGTH_ATTRIBUTE] * edge_dict[CAPACITY_ATTRIBUTE]
     return total
 
 
-def maximum_concurrent_flow(edges, commodities, error=0.01):
+def maximum_concurrent_flow(edges, commodities, error=0.1):
     '''
     Takes in an iterable of edges and commodities and calculates the maximum
     concurrent flow
     '''
+    #calculate parameters
     epsilon = calculate_epsilon(error)
     delta = calculate_delta(len(edges), epsilon)
-
+    print "ED" + str(epsilon) + " " + str(delta)
+    #set initial edge lengths
     for edge in edges:
-        head, tail = edge.head, edge.tail
-
         edge.length = delta / edge.capacity
 
+    #construct graph
     G = construct_graph(edges)
     
-    count = 0
+    count = 0 
+    #start iterations
+
     while calculate_dual_objective(G) < 1:  # phases
         count += 1
         print count, calculate_dual_objective(G)
         for commodity in commodities:  # iterations
             
             # 1 Get the edges and flows in the min cost flow
+
             flow_dict = run_min_cost_flow(G, commodity)
+
 
             # 2 send flow along those edges and update our length function
             for head in flow_dict.iterkeys():
@@ -155,9 +160,25 @@ def maximum_concurrent_flow(edges, commodities, error=0.01):
                                                  / edge[CAPACITY_ATTRIBUTE]))
 
     # scale by log_(1+e) (1+e)
+    total = 0
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
-            edge_dict[FLOW_ATTRIBUTE] * log(1. / delta) / log(1 + epsilon)
-
+            #raw_input(edge_dict)
+            edge_dict[FLOW_ATTRIBUTE] /= log(1. / delta) / log(1 + epsilon)
+            print edge_dict[FLOW_ATTRIBUTE]
+            total+= edge_dict[FLOW_ATTRIBUTE]
+    
+    commodityTable = {}
+    for commodity in commodities:
+        commodityTable[commodity] = 0
+    for head in G.edge.iterkeys():
+        for tail, edge_dict in G.edge[head].iteritems():
+            for commodity in commodities:
+                if tail == commodity.sink: 
+                    commodityTable[commodity]+=edge_dict[FLOW_ATTRIBUTE]/commodity.demand
+            
+    print "Lambda is " + str( min([x for x in commodityTable.itervalues()]))
+    print "Objective is " + str(calculate_dual_objective(G))
+#    print "Alpha is " + str(calculate_alpha(G,commodities))
     return G.edge
 

@@ -22,11 +22,13 @@ from max_concurrent_flow import *
 class TestCase1():
     def __init__(self):
         self.edgeList = []
-        self.edgeList.append(Edge("S","1",4))
-        self.edgeList.append(Edge("S","2",3))
-        self.edgeList.append(Edge("1","2",3))
-        self.edgeList.append(Edge("1","T",4))
-        self.edgeList.append(Edge("2","T",5))
+        self.edgeList.append(Edge("S","A",4))
+        self.edgeList.append(Edge("S","B",3))
+        self.edgeList.append(Edge("A","B",3))
+        self.edgeList.append(Edge("A","T",4))
+        self.edgeList.append(Edge("B","T",5))
+        
+        
 
 
     def run_max_concurrent_flow(self,demand):
@@ -35,9 +37,9 @@ class TestCase1():
 
 
 tc1 = TestCase1()
-print tc1.run_max_concurrent_flow(7) #Beta = 1
-print tc1.run_max_concurrent_flow(.7) #Beta = 10
-print tc1.run_max_concurrent_flow(70) #Beta = .1
+print tc1.run_max_concurrent_flow(6.5) #Beta = 1
+#print tc1.run_max_concurrent_flow(.7) #Beta = 10
+#print tc1.run_max_concurrent_flow(70) #Beta = .1
 
 #Less basic test case: multiple commodities
 
@@ -58,5 +60,6 @@ class TestCase2():
         carrots = Commodity("S","6",demand2)
         return maximum_concurrent_flow(self.edgeList,[peas,carrots])
 
+tc2 = TestCase2()
 
 
