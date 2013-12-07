@@ -150,9 +150,8 @@ def maximum_concurrent_flow(edges, commodities, error=0.01):
                     edge = G.edge[head][tail]
 
                     edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + flow
-                    edge[LENGTH_ATTRIBUTE] = (edge[LENGTH_ATTRIBUTE]
-                                              * (1. + epsilon * flow
-                                                 / edge[CAPACITY_ATTRIBUTE]))
+                    edge[LENGTH_ATTRIBUTE] *= (1. + epsilon * flow
+                                               / edge[CAPACITY_ATTRIBUTE])
 
     # scale by log_(1+e) (1+e)
     for head in G.edge.iterkeys():
