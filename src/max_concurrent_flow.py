@@ -5,8 +5,8 @@ as described in http://cgi.csc.liv.ac.uk/~piotr/ftp/mcf-jv.pdf
 from math import log
 
 import networkx as nx
-from networkx.algorithms.flows import min_cost_flow
-from networkx.algorithms.flows import min_cost_flow_cost
+from networkx.algorithms.flow import min_cost_flow
+from networkx.algorithms.flow import min_cost_flow_cost
 
 # constants
 LENGTH_ATTRIBUTE = 'length'
@@ -47,11 +47,6 @@ def construct_graph(edges):
     return G
 
 
-def update_lengths(G, lengths):
-    for edge, length in lengths.iteritems():
-        G.edge[edge][LENGTH_ATTRIBUTE] = length
-
-
 def run_min_cost_flow(G, commodity, cost=False):
     '''
     Given a digraph G and commodity, this runs a min cost flow on the graph for
@@ -76,7 +71,7 @@ def run_min_cost_flow(G, commodity, cost=False):
     return result
 
 
-def calculate_alpha(G, lengths, commodities, min_cost_flow=True):
+def calculate_alpha(G, commodities, min_cost_flow=True):
     '''
     Takes in a digraph and an iterable of commodities, returns the sum of the
     min cost flows for satisfying these commodity demands independently
@@ -84,8 +79,6 @@ def calculate_alpha(G, lengths, commodities, min_cost_flow=True):
     Throws a NetworkXUnfeasible exception if there is no way to satisfy the
     demands
     '''
-    update_lengths(G, lengths)
-
     total = 0
 
     if min_cost_flow:
@@ -112,14 +105,16 @@ def calculate_epsilon(error):
     return 1 - (1 + error) ** -1./3 - FP_ERROR_MARGIN
 
 
-def calculate_dual_objective(lengths, edges):
+def calculate_dual_objective(G):
     '''
     Calculates D(l) = sum c(e)l(e) over all e
     '''
     total = 0
 
-    for edge in edges:
-        total += lengths[edge] * edge.capacity
+    for head in G.edge.iterkeys():
+        for tail, edge_dict in G.edge[head].iteritems():
+            edge = G.edge[head][tail]
+            total += edge[LENGTH_ATTRIBUTE] * edge['capacity']
 
     return total
 
@@ -132,31 +127,30 @@ def maximum_concurrent_flow(edges, commodities, error=0.01):
     epsilon = calculate_epsilon(error)
     delta = calculate_delta(len(edges), epsilon)
 
-    lengths = {}  # hashmap of nodes to lengths
     for edge in edges:
+        head, tail = edge.head, edge.tail
+
         edge.length = delta / edge.capacity
 
     G = construct_graph(edges)
 
-    while calculate_dual_objective(lengths, edges) < 0:  # phases
+    while calculate_dual_objective(G) < 1:  # phases
         for commodity in commodities:  # iterations
             
             # 1 Get the edges and flows in the min cost flow
-            flow_dict += run_min_cost_flow(G, commodity)
+            flow_dict = run_min_cost_flow(G, commodity)
 
             # 2 send flow along those edges and update our length function
             for head in flow_dict.iterkeys():
-                for tail, flow in head.iteritems():
+                for tail, flow in flow_dict[head].iteritems():
                     edge = G.edge[head][tail]
 
-                    edge[FLOW_ATTRIBUTE] += flow
-                    lengths[edge] = (lengths[edge]
-                                     * (1. + epsilon * flow / edge.capacity))
+                    edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + flow
 
     # scale by log_(1+e) (1+e)
     for head in G.edge.iterkeys():
-        for tail, edge_dict in head.iteritems():
-            edge[FLOW_ATTRIBUTE] * log(1. / delta) / log(1 + epsilon)
+        for tail, edge_dict in G.edge[head].iteritems():
+            edge_dict[FLOW_ATTRIBUTE] * log(1. / delta) / log(1 + epsilon)
 
     return G.edge
 
