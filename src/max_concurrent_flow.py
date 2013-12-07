@@ -9,9 +9,10 @@ from networkx.algorithms.flow import min_cost_flow
 from networkx.algorithms.flow import min_cost_flow_cost
 
 # constants
-LENGTH_ATTRIBUTE = 'length'
+CAPACITY_ATTRIBUTE = 'capacity'
 DEMAND_ATTRIBUTE = 'demand'
-FLOW_ATTRIBUTE = 'flow'
+FLOW_ATTRIBUTE = '_flow'
+LENGTH_ATTRIBUTE = 'length'
 FP_ERROR_MARGIN = 10 ** -10  # floating point error margin
 
 
@@ -114,7 +115,7 @@ def calculate_dual_objective(G):
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
             edge = G.edge[head][tail]
-            total += edge[LENGTH_ATTRIBUTE] * edge['capacity']
+            total += edge[LENGTH_ATTRIBUTE] * edge[CAPACITY_ATTRIBUTE]
 
     return total
 
@@ -133,8 +134,11 @@ def maximum_concurrent_flow(edges, commodities, error=0.01):
         edge.length = delta / edge.capacity
 
     G = construct_graph(edges)
-
+    
+    count = 0
     while calculate_dual_objective(G) < 1:  # phases
+        count += 1
+        print count, calculate_dual_objective(G)
         for commodity in commodities:  # iterations
             
             # 1 Get the edges and flows in the min cost flow
@@ -146,6 +150,9 @@ def maximum_concurrent_flow(edges, commodities, error=0.01):
                     edge = G.edge[head][tail]
 
                     edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + flow
+                    edge[LENGTH_ATTRIBUTE] = (edge[LENGTH_ATTRIBUTE]
+                                              * (1. + epsilon * flow
+                                                 / edge[CAPACITY_ATTRIBUTE]))
 
     # scale by log_(1+e) (1+e)
     for head in G.edge.iterkeys():
