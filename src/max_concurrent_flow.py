@@ -53,11 +53,12 @@ def run_shortest_path_commodity(G, commodity):
     of the commodity to the sink of the commodity.
     '''
     source, sink = commodity.source, commodity.sink
-    result_nodes = nx.shortest_path(G,source,sink,'weight')
-    result = []
-    for index in xrange(len(result_nodes)-1):
-        result.append(G.edge[result_nodes[index]][result_nodes[index+1]])
-    return result
+
+    nodes = nx.shortest_path(G,source,sink,'weight')
+    edges = []
+    for index in xrange(len(nodes)-1):
+        edges.append(G.edge[nodes[index]][nodes[index+1]])
+    return edges
 
 
 def calculate_alpha(G, commodities):
@@ -70,8 +71,9 @@ def calculate_alpha(G, commodities):
     '''
     total = 0
     for commodity in commodities:
-        dist_j = sum([edge[LENGTH_ATTRIBUTE] for edge in run_shortest_path_commodity(G,commodity)])
-        total+= commodity.demand*dist_j
+        dist_j = sum([edge[LENGTH_ATTRIBUTE]
+                      for edge in run_shortest_path_commodity(G,commodity)])
+        total += commodity.demand * dist_j
 
     return total
 
@@ -87,10 +89,11 @@ def calculate_epsilon(error):
     '''
     Calculates epsilon such that (1-e) ^ -3 is at most 1+error
     '''
-    epsilon =  (error+1-((error+1)**2)**(1.0/3))/(error+1)
-    epsilon *=0.99
-    print epsilon, (1/(1-epsilon)**3), 1+error
+    epsilon =  (error + 1 - ((error + 1) ** 2) ** (1.0 / 3))/(error + 1)
+    epsilon *= 0.99
+
     assert(1/(1-epsilon)**3<=1+error)
+
     return epsilon
 
 def calculate_dual_objective(G):
@@ -105,7 +108,7 @@ def calculate_dual_objective(G):
     return total
 
 
-def maximum_concurrent_flow(edges, commodities, error=.01):
+def maximum_concurrent_flow(edges, commodities, error=.1):
     '''
     Takes in an iterable of edges and commodities and calculates the maximum
     concurrent flow
@@ -124,20 +127,23 @@ def maximum_concurrent_flow(edges, commodities, error=.01):
     count = 0 
     #start iterations
 
-    while calculate_dual_objective(G) < 1:  # phases
+    while calculate_dual_objective(G) < 1.:  # phases
         count += 1 
-        if count%1000==0:
+        if count % 1000 == 0:
             print count, calculate_dual_objective(G)
+
         for commodity in commodities:  # iterations
             d_j = commodity.demand
-            while d_j>0:
-                sp = run_shortest_path_commodity(G,commodity)
-                c = min([edge[CAPACITY_ATTRIBUTE] for edge in sp])
+            while d_j > 0:
+                path = run_shortest_path_commodity(G, commodity)
+                c = min([edge[CAPACITY_ATTRIBUTE] for edge in path])
+
                 added_flow = min(c,d_j)
-                d_j-= added_flow
-                for edge in sp:
-                    edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE,0)+added_flow
-                    edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE]*(1+epsilon*added_flow/edge[CAPACITY_ATTRIBUTE])
+                d_j -= added_flow
+
+                for edge in path:
+                    edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + added_flow
+                    edge[LENGTH_ATTRIBUTE] = edge[LENGTH_ATTRIBUTE] * (1 + epsilon * added_flow / edge[CAPACITY_ATTRIBUTE])
                 
     
     # scale by log_(1+e) (1+e)
@@ -145,9 +151,8 @@ def maximum_concurrent_flow(edges, commodities, error=.01):
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
             #raw_input(edge_dict)
-            edge_dict[FLOW_ATTRIBUTE] = edge_dict.get(FLOW_ATTRIBUTE,0)/(log(1. / delta) / log(1 + epsilon))
-            total+= edge_dict[FLOW_ATTRIBUTE]
-    
+            edge_dict[FLOW_ATTRIBUTE] = edge_dict.get(FLOW_ATTRIBUTE, 0)/(log(1. / delta) / log(1 + epsilon))
+            total += edge_dict[FLOW_ATTRIBUTE]
 
     return G.edge
 
