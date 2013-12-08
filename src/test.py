@@ -67,5 +67,4 @@ for demand in [(1,.5),(10,10),(4,4)]:
     result = tc2.run_max_concurrent_flow(demand[0],demand[1])
     print min(result['2']['3']['_flow']/demand[0],result['5']['6']['_flow']/demand[1])
     print result
-    raw_input()
 

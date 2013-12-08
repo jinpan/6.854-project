@@ -105,7 +105,7 @@ def calculate_dual_objective(G):
     return total
 
 
-def maximum_concurrent_flow(edges, commodities, error=.1):
+def maximum_concurrent_flow(edges, commodities, error=.01):
     '''
     Takes in an iterable of edges and commodities and calculates the maximum
     concurrent flow
