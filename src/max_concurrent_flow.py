@@ -206,6 +206,18 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,scale_beta=Tr
                 demandRatios = defaultDemandRatios[source][:]
                 demandsRemaining = [com.demand for com in comList]
                 tempFlowAdd = {}
+                if len(comList) == 1:
+                    d_j = commodity.demand
+                    while d_j>0:
+                        sp = run_shortest_path_commodity(G,commodity)
+                        c = min([edge[CAPACITY_ATTRIBUTE] for edge in sp])
+                        added_flow = min(c,d_j)
+                        d_j-= added_flow
+                        for edge in sp:
+                            edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE,0)+added_flow
+                            edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE]*(1+epsilon*added_flow/edge[CAPACITY_ATTRIBUTE])
+                    continue
+
                 while True:
                     for index,commodity in enumerate(comList):
                         path = pathMap[commodity.sink]
