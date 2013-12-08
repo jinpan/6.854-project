@@ -5,14 +5,12 @@ as described in http://cgi.csc.liv.ac.uk/~piotr/ftp/mcf-jv.pdf
 from math import log
 import math
 import networkx as nx
-from networkx.algorithms.flow import min_cost_flow
-from networkx.algorithms.flow import min_cost_flow_cost
 
 # constants
 CAPACITY_ATTRIBUTE = 'capacity'
 DEMAND_ATTRIBUTE = 'demand'
 FLOW_ATTRIBUTE = '_flow'
-LENGTH_ATTRIBUTE = 'length'
+LENGTH_ATTRIBUTE = 'weight'
 FP_ERROR_MARGIN = 10 ** -10  # floating point error margin
 
 
@@ -49,32 +47,20 @@ def construct_graph(edges):
     return G
 
 
-def run_min_cost_flow(G, commodity, cost=False):
+def run_shortest_path_commodity(G, commodity):
     '''
-    Given a digraph G and commodity, this runs a min cost flow on the graph for
-    that commodity.
-
-    If cost is true, we return just the cost; otherwise, we return a hashmap of
-    the flow
+    Given a digraph G and commodity, this runs a shortest path from the source
+    of the commodity to the sink of the commodity.
     '''
     source, sink = commodity.source, commodity.sink
-
-    G.node[source][DEMAND_ATTRIBUTE] = -commodity.demand
-    G.node[sink][DEMAND_ATTRIBUTE] = commodity.demand
-    if cost:
-        result = min_cost_flow_cost(G)
-        
-    else:
-        
-        result = min_cost_flow(G)
-
-    G.node[source][DEMAND_ATTRIBUTE] = 0
-    G.node[sink][DEMAND_ATTRIBUTE] = 0
-
+    result_nodes = nx.shortest_path(G,source,sink,'weight')
+    result = []
+    for index in xrange(len(result_nodes)-1):
+        result.append(G.edge[result_nodes[index]][result_nodes[index+1]])
     return result
 
 
-def calculate_alpha(G, commodities, min_cost_flow=True):
+def calculate_alpha(G, commodities):
     '''
     Takes in a digraph and an iterable of commodities, returns the sum of the
     min cost flows for satisfying these commodity demands independently
@@ -83,13 +69,9 @@ def calculate_alpha(G, commodities, min_cost_flow=True):
     demands
     '''
     total = 0
-
-    if min_cost_flow:
-        for commodity in commodities:
-            total += run_min_cost_flow(G, commodity, cost=True)
-
-    else:  # use the shortest paths
-        raise NotImplementedError
+    for commodity in commodities:
+        dist_j = sum([edge[LENGTH_ATTRIBUTE] for edge in run_shortest_path_commodity(G,commodity)])
+        total+= commodity.demand*dist_j
 
     return total
 
@@ -119,11 +101,11 @@ def calculate_dual_objective(G):
 
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
-            total += edge_dict['weight'] * edge_dict[CAPACITY_ATTRIBUTE]
+            total += edge_dict[LENGTH_ATTRIBUTE] * edge_dict[CAPACITY_ATTRIBUTE]
     return total
 
 
-def maximum_concurrent_flow(edges, commodities, error=.5):
+def maximum_concurrent_flow(edges, commodities, error=.01):
     '''
     Takes in an iterable of edges and commodities and calculates the maximum
     concurrent flow
@@ -131,7 +113,7 @@ def maximum_concurrent_flow(edges, commodities, error=.5):
     #calculate parameters
     epsilon = calculate_epsilon(error)
     delta = calculate_delta(len(edges), epsilon)
-    print "ED" + str(epsilon) + " " + str(delta)
+
     #set initial edge lengths
     for edge in edges:
         edge.length = delta / edge.capacity
@@ -143,45 +125,29 @@ def maximum_concurrent_flow(edges, commodities, error=.5):
     #start iterations
 
     while calculate_dual_objective(G) < 1:  # phases
-        count += 1
-        print count, calculate_dual_objective(G)
+        count += 1 
+        if count%1000==0:
+            print count, calculate_dual_objective(G)
         for commodity in commodities:  # iterations
-            
-            # 1 Get the edges and flows in the min cost flow
-
-            flow_dict = run_min_cost_flow(G, commodity)
-
-
-            # 2 send flow along those edges and update our length function
-            for head in flow_dict.iterkeys():
-                for tail, flow in flow_dict[head].iteritems():
-                    edge = G.edge[head][tail]
-
-                    edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + flow
-                    edge['weight'] = (edge['weight']
-                                              * (1. + epsilon * flow
-                                                 / edge[CAPACITY_ATTRIBUTE]))
-
+            d_j = commodity.demand
+            while d_j>0:
+                sp = run_shortest_path_commodity(G,commodity)
+                c = min([edge[CAPACITY_ATTRIBUTE] for edge in sp])
+                added_flow = min(c,d_j)
+                d_j-= added_flow
+                for edge in sp:
+                    edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE,0)+added_flow
+                    edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE]*(1+epsilon*added_flow/edge[CAPACITY_ATTRIBUTE])
+                
+    
     # scale by log_(1+e) (1+e)
     total = 0
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
             #raw_input(edge_dict)
             edge_dict[FLOW_ATTRIBUTE] /= log(1. / delta) / log(1 + epsilon)
-            print edge_dict[FLOW_ATTRIBUTE]
             total+= edge_dict[FLOW_ATTRIBUTE]
     
-    commodityTable = {}
-    for commodity in commodities:
-        commodityTable[commodity] = 0
-    for head in G.edge.iterkeys():
-        for tail, edge_dict in G.edge[head].iteritems():
-            for commodity in commodities:
-                if tail == commodity.sink: 
-                    commodityTable[commodity]+=edge_dict[FLOW_ATTRIBUTE]/commodity.demand
-            
-    print "Lambda is " + str( min([x for x in commodityTable.itervalues()]))
-    print "Objective is " + str(calculate_dual_objective(G))
-#    print "Alpha is " + str(calculate_alpha(G,commodities))
+
     return G.edge
 
