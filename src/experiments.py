@@ -44,11 +44,13 @@ def randomCommodities(random_graph, numCommodities, commodityDistribution = None
         while not done:
             randomChoice = random.sample(nodes,1)[0]
             possSinks = [k for k in nx.shortest_path(random_graph,randomChoice).iterkeys()]
+            possSinks.remove(randomChoice)
             if len(possSinks)<xCommodities:
                 pass
             else:
                 nodes.remove(randomChoice)
                 sinks = random.sample(possSinks,xCommodities)
+                
                 for sink in sinks: 
                     commodities.append(Commodity(randomChoice,sink,random.randint(1,50)))
                 done = True
