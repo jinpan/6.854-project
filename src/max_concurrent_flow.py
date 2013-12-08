@@ -105,7 +105,7 @@ def calculate_dual_objective(G):
     return total
 
 
-def maximum_concurrent_flow(edges, commodities, error=.01):
+def maximum_concurrent_flow(edges, commodities, error=.1):
     '''
     Takes in an iterable of edges and commodities and calculates the maximum
     concurrent flow
@@ -145,7 +145,7 @@ def maximum_concurrent_flow(edges, commodities, error=.01):
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
             #raw_input(edge_dict)
-            edge_dict[FLOW_ATTRIBUTE] /= log(1. / delta) / log(1 + epsilon)
+            edge_dict[FLOW_ATTRIBUTE] = edge_dict.get(FLOW_ATTRIBUTE,0)/(log(1. / delta) / log(1 + epsilon))
             total+= edge_dict[FLOW_ATTRIBUTE]
     
 
