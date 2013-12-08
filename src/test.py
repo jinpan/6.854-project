@@ -67,7 +67,7 @@ class TestCase2():
         return two_approx(self.edgeList,commodities)
 
 tc2 = TestCase2()
-if False:
+if True:
     for demand in [(1,.5),(10,10),(4,4)]:
 
         result = tc2.run_max_concurrent_flow(demand[0],demand[1])    

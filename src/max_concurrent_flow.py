@@ -11,7 +11,7 @@ CAPACITY_ATTRIBUTE = 'capacity'
 DEMAND_ATTRIBUTE = 'demand'
 FLOW_ATTRIBUTE = '_flow'
 LENGTH_ATTRIBUTE = 'weight'
-FP_ERROR_MARGIN = 10 ** -10  # floating point error margin
+FP_ERROR_MARGIN = 10e-10  # floating point error margin
 GLOBAL_ERROR = 0.05
 
 
@@ -34,12 +34,12 @@ class Commodity(object):
         self.demand = demand
 
 
-def scale_demands(commodities,scaleFactor):
+def scale_demands(commodities, scaleFactor):
     '''
     Scales each demand commodities by multiplying by scaleFactor
     '''
     for commodity in commodities:
-        commodity.demand*= scaleFactor
+        commodity.demand *= scaleFactor
 
 
 def construct_graph(edges):
@@ -52,24 +52,29 @@ def construct_graph(edges):
                    edge.tail,
                    capacity=edge.capacity,
                    weight=edge.length)
-
     return G
 
 
-def run_shortest_path_commodity(G, commodity, allSink = False):
+def get_edges(G, node_path):
+    edges = []
+    for idx, head in enumerate(node_path[:-1]):
+        tail = node_path[idx + 1]
+        edges.append(G.edge[head][tail])
+    return edges
+
+
+def run_shortest_path_commodity(G, commodity, allSinks=False):
     '''
     Given a digraph G and commodity, this runs a shortest path from the source
     of the commodity to the sink of the commodity.
     '''
     source, sink = commodity.source, commodity.sink
-    if not allSink:
-        result_nodes = nx.shortest_path(G,source,sink,'weight')
-        result = []
-        for index in xrange(len(result_nodes)-1):
-            result.append(G.edge[result_nodes[index]][result_nodes[index+1]])
-        return result
+    if not allSinks:
+        node_path = nx.shortest_path(G, source, sink, weight=LENGTH_ATTRIBUTE)
+        return get_edges(G, node_path)
     else:
-        result_map = nx.shortest_path(G,source,target=None,weight ='weight')
+        result_map = nx.shortest_path(G, source, target=None,
+                                      weight=LENGTH_ATTRIBUTE)
         return result_map
         
 
@@ -83,9 +88,9 @@ def calculate_alpha(G, commodities):
     '''
     total = 0
     for commodity in commodities:
-        dist_j = sum([edge[LENGTH_ATTRIBUTE] for edge in run_shortest_path_commodity(G,commodity)])
-        total+= commodity.demand*dist_j
-
+        dist_j = sum([edge[LENGTH_ATTRIBUTE]
+                      for edge in run_shortest_path_commodity(G,commodity)])
+        total += commodity.demand * dist_j
     return total
 
 
@@ -126,22 +131,23 @@ def calculate_z(G, commodities):
     '''
     zList = []
     for commodity in commodities:
-        zList.append(nx.max_flow(G,commodity.source,commodity.sink)/float(commodity.demand))
+        zList.append(nx.max_flow(G, commodity.source, commodity.sink) / float(commodity.demand))
     return min(zList)
 
 
 def calculate_demand_ratios(commodities, demands=None):
     '''
-    lol
+    Takes in a list of commodities and demands.  If demands are not given,
+    it defaults to a list of the full demands for the commodities.
+
+    Returns a multi-ratio of the demands
     '''
     demands = demands or [commodity.demand for commodity in commodities]
     totalDemand = sum(demands)
-    return [x / float(totalDemand) for x in demands]
+    return [demand / float(totalDemand) for demand in demands]
 
 
-    
-
-def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,scale_beta=True, returnBeta = False, karakosta = False):
+def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR, scale_beta=True, returnBeta = False, karakosta = False):
     '''
     Takes in an iterable of edges and commodities and calculates the maximum
     concurrent flow
@@ -159,115 +165,98 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,scale_beta=Tr
     
     #calculate z and scale demands
     if scale_beta:
-        z = calculate_z(G,commodities)
-        k = float(len(commodities))
+        z = calculate_z(G,commodities)  # z is minimum of shortest paths
+        k = float(len(commodities))  # k is number of commodities
         t = 2 * (1. / epsilon) * log(len(edges) / (1 - epsilon)) / log(1 + epsilon)
-        t = int(t)
-        print t
-        scale_demands(commodities,k/z) #so z/k is 1
+        t = int(t)  # t is iteration threshold
+        scale_demands(commodities,k/z)  # so z/k is 1
     
     count = 0 
     #start iterations
     
-    #group commodities by source if karakosta
+    # group commodities by source if karakosta
     if karakosta:
-        commoditySourceMap = {}
+        commoditySourceMap = set()  # collects all possible sources
         for commodity in commodities:
-            commoditySourceMap[commodity.source]= 1
-        commoditiesGroupedBySource,defaultDemandRatios = {},{}
-        for commoditySource in commoditySourceMap.iterkeys():
-            
-            commoditySourceList = []
-            for commodity in commodities:
-                if commodity.source == commoditySource:
-                    commoditySourceList.append(commodity)
-            defaultDemandRatios[commoditySource] = calculate_demand_ratios(\
-                                        commoditySourceList)
-            commoditiesGroupedBySource[commoditySource]=commoditySourceList
-            
-        
-            
+            commoditySourceMap.add(commodity.source)
 
-    
+        commoditiesGroupedBySource, defaultDemandRatios = {}, {}
+        for commoditySource in commoditySourceMap:
+            commoditySourceList = [commodity for commodity in commodities
+                                   if commodity.source == commoditySource]
+            defaultDemandRatios[commoditySource] = calculate_demand_ratios(commoditySourceList)
+            commoditiesGroupedBySource[commoditySource] = commoditySourceList
+
     while calculate_dual_objective(G) < 1:  # phases
         count += 1 
-        if count%1000==0:
+        if count % 1000 == 0:
             print count, calculate_dual_objective(G)
-        if scale_beta and count % t == 0:
-            scale_demands(commodities,2)
-            for commodity in commodities:
-                print commodity.demand
+        if scale_beta and count % t == 0:  # for scaling
+            scale_demands(commodities, 2)
         
-        #if we grouped commodities by source
+        # if we grouped commodities by source
         if karakosta:
-            for source,comList in commoditiesGroupedBySource.iteritems():
+            for source, comList in commoditiesGroupedBySource.iteritems():
                 repElement = comList[0]
-                pathMap = run_shortest_path_commodity(G,repElement,allSink=True)
+                pathMap = run_shortest_path_commodity(G, repElement, allSinks=True)
                 demandRatios = defaultDemandRatios[source][:]
-                demandsRemaining = [com.demand for com in comList]
+                demandRemaining = [com.demand for com in comList]
                 tempFlowAdd = {}
+
                 if len(comList) == 1:
                     d_j = commodity.demand
-                    while d_j>0:
-                        sp = run_shortest_path_commodity(G,commodity)
-                        c = min([edge[CAPACITY_ATTRIBUTE] for edge in sp])
-                        added_flow = min(c,d_j)
-                        d_j-= added_flow
+                    while d_j > 0:
+                        sp = run_shortest_path_commodity(G, commodity)
+                        min_cap = min([edge[CAPACITY_ATTRIBUTE] for edge in sp])
+                        added_flow = min(min_cap,d_j)
+                        d_j -= added_flow
                         for edge in sp:
-                            edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE,0)+added_flow
-                            edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE]*(1+epsilon*added_flow/edge[CAPACITY_ATTRIBUTE])
+                            edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + added_flow
+                            edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE] * (1 + epsilon * added_flow / edge[CAPACITY_ATTRIBUTE])
                     continue
 
                 while True:
-                    for index,commodity in enumerate(comList):
-                        path = pathMap[commodity.sink]
-                        edgeList = []
-                        for i,node in enumerate(path[:-1]):
-                            edgeList.append((node,path[i+1],G.edge[node][path[i+1]]))
+                    for index, commodity in enumerate(comList):  # for every commodity that shares a source
+                        edge_dict = get_edges(pathMap[commodity.sink])
+
                         ratio = demandRatios[index]
-                        minCapacity = min([edgeDict[CAPACITY_ATTRIBUTE] for head,tail,edgeDict in edgeList])
-                        flow_added = ratio*min(demandsRemaining[index],minCapacity)
-                        for head,tail,edgeDict in edgeList:
-                            edgeDict[FLOW_ATTRIBUTE] = edgeDict.get(FLOW_ATTRIBUTE,0)+flow_added
-                            tempFlowAdd[(head,tail)]= tempFlowAdd.get((head,tail),0)+ flow_added
-                        demandsRemaining[index]-=flow_added
-                    demandRatios = calculate_demand_ratios(comList,demandsRemaining)
-                    if max(demandsRemaining)<=FP_ERROR_MARGIN: break
-                for identifier,flow in tempFlowAdd.iteritems():
-                    head,tail = identifier
+                        min_cap = min([edgeDict[CAPACITY_ATTRIBUTE] for head,tail,edgeDict in edgeList])  # select the minimum capacity from the edges
+                        added_flow = ratio * min(demandRemaining[index], min_cap)  # scale min_cap by the ratio
+                        for head, tail, edgeDict in edgeList:
+                            edgeDict[FLOW_ATTRIBUTE] = edgeDict.get(FLOW_ATTRIBUTE, 0) + added_flow
+                            tempFlowAdd[(head, tail)]= tempFlowAdd.get((head, tail), 0) + added_flow
+                        demandRemaining[index] -= added_flow
+                    demandRatios = calculate_demand_ratios(comList, demandRemaining)
+                    if max(demandRemaining) <= FP_ERROR_MARGIN: break  # all remaining demands effectively 0
+
+                for identifier, flow in tempFlowAdd.iteritems():
+                    head, tail = identifier
                     edge = G.edge[head][tail]
-                    edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE]*(1+epsilon*flow/edge[CAPACITY_ATTRIBUTE])
-        else:
+                    edge[LENGTH_ATTRIBUTE] = edge[LENGTH_ATTRIBUTE] * (1 + epsilon * flow / edge[CAPACITY_ATTRIBUTE])
+        else:  # if not karakosta
             for commodity in commodities:  # iterations
                 d_j = commodity.demand
-                while d_j>0:
-                    sp = run_shortest_path_commodity(G,commodity)
-                    c = min([edge[CAPACITY_ATTRIBUTE] for edge in sp])
-                    added_flow = min(c,d_j)
-                    d_j-= added_flow
+                while d_j > 0:
+                    sp = run_shortest_path_commodity(G, commodity)
+                    min_cap = min([edge[CAPACITY_ATTRIBUTE] for edge in sp])
+                    added_flow = min(min_cap,d_j)
+                    d_j -= added_flow
                     for edge in sp:
-                        edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE,0)+added_flow
-                        edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE]*(1+epsilon*added_flow/edge[CAPACITY_ATTRIBUTE])
+                        edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + added_flow
+                        edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE] * (1 + epsilon * added_flow / edge[CAPACITY_ATTRIBUTE])
                 
-    
-    if returnBeta:
-        return calculate_dual_objective(G)/calculate_alpha(G,commodities)
+    if returnBeta:  # returns beta value, not edge_dict, used in 2-approx
+        return calculate_dual_objective(G) / calculate_alpha(G, commodities)
     # scale by log_(1+e) (1+e)
-    total = 0
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
-            #raw_input(edge_dict)
-            edge_dict[FLOW_ATTRIBUTE] = edge_dict.get(FLOW_ATTRIBUTE,0)/(log(1. / delta) / log(1 + epsilon))
-            total+= edge_dict[FLOW_ATTRIBUTE]
-    
+            edge_dict[FLOW_ATTRIBUTE] = edge_dict.get(FLOW_ATTRIBUTE, 0) / (log(1. / delta) / log(1 + epsilon))
 
     return G.edge
 
+
 def two_approx(edges, commodities, error=GLOBAL_ERROR):
-    beta_hat = maximum_concurrent_flow(edges,commodities,error=1.,returnBeta=True)
-    scale_demands(commodities,beta_hat/2.)
-    return maximum_concurrent_flow(edges,commodities,error=error,scale_beta=False)
-    
-    
-def karakosta(edges, commodities, error=GLOBAL_ERROR):
-    pass
+    beta_hat = maximum_concurrent_flow(edges, commodities ,error=1., returnBeta=True)
+    scale_demands(commodities, beta_hat / 2.)
+    return maximum_concurrent_flow(edges, commodities, error=error, scale_beta=False)
+
