@@ -207,6 +207,10 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,scale_beta=Tr
                 demandsRemaining = [com.demand for com in comList]
                 tempFlowAdd = {}
                 while True:
+                    if len(comList)==1:
+                        
+                    else:
+
                     for index,commodity in enumerate(comList):
                         path = pathMap[commodity.sink]
                         edgeList = []
@@ -225,6 +229,7 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,scale_beta=Tr
                     head,tail = identifier
                     edge = G.edge[head][tail]
                     edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE]*(1+epsilon*flow/edge[CAPACITY_ATTRIBUTE])
+
         else:
             for commodity in commodities:  # iterations
                 d_j = commodity.demand
