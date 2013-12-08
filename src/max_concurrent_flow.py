@@ -3,7 +3,7 @@ Maximum concurrent flow solver using the iterative method on the dual of MCF
 as described in http://cgi.csc.liv.ac.uk/~piotr/ftp/mcf-jv.pdf
 '''
 from math import log
-
+import math
 import networkx as nx
 from networkx.algorithms.flow import min_cost_flow
 from networkx.algorithms.flow import min_cost_flow_cost
@@ -44,8 +44,8 @@ def construct_graph(edges):
         G.add_edge(edge.head,
                    edge.tail,
                    capacity=edge.capacity,
-                   length=edge.length)
-        
+                   weight=edge.length)
+
     return G
 
 
@@ -62,11 +62,11 @@ def run_min_cost_flow(G, commodity, cost=False):
     G.node[source][DEMAND_ATTRIBUTE] = -commodity.demand
     G.node[sink][DEMAND_ATTRIBUTE] = commodity.demand
     if cost:
-        result = min_cost_flow_cost(G, weight=LENGTH_ATTRIBUTE)
+        result = min_cost_flow_cost(G)
         
     else:
         
-        result = min_cost_flow(G, weight=LENGTH_ATTRIBUTE)
+        result = min_cost_flow(G)
 
     G.node[source][DEMAND_ATTRIBUTE] = 0
     G.node[sink][DEMAND_ATTRIBUTE] = 0
@@ -105,8 +105,11 @@ def calculate_epsilon(error):
     '''
     Calculates epsilon such that (1-e) ^ -3 is at most 1+error
     '''
-    return 1-1.0/((1+error)**3) -FP_ERROR_MARGIN
-
+    epsilon =  (error+1-((error+1)**2)**(1.0/3))/(error+1)
+    epsilon *=0.99
+    print epsilon, (1/(1-epsilon)**3), 1+error
+    assert(1/(1-epsilon)**3<=1+error)
+    return epsilon
 
 def calculate_dual_objective(G):
     '''
@@ -116,11 +119,11 @@ def calculate_dual_objective(G):
 
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
-            total += edge_dict[LENGTH_ATTRIBUTE] * edge_dict[CAPACITY_ATTRIBUTE]
+            total += edge_dict['weight'] * edge_dict[CAPACITY_ATTRIBUTE]
     return total
 
 
-def maximum_concurrent_flow(edges, commodities, error=0.1):
+def maximum_concurrent_flow(edges, commodities, error=.5):
     '''
     Takes in an iterable of edges and commodities and calculates the maximum
     concurrent flow
@@ -155,8 +158,9 @@ def maximum_concurrent_flow(edges, commodities, error=0.1):
                     edge = G.edge[head][tail]
 
                     edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + flow
-                    edge[LENGTH_ATTRIBUTE] *= (1. + epsilon * flow
-                                               / edge[CAPACITY_ATTRIBUTE])
+                    edge['weight'] = (edge['weight']
+                                              * (1. + epsilon * flow
+                                                 / edge[CAPACITY_ATTRIBUTE]))
 
     # scale by log_(1+e) (1+e)
     total = 0
