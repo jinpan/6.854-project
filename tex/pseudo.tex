@@ -1,0 +1,33 @@
+
+\SetAlgoSkip{}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[h!] \small
+$G \leftarrow (V,E)$\;
+$\epsilon,\delta \leftarrow \mathrm{calculate\_epsilon}(\omega),\mathrm{calculate\_delta}(\omega)$\;
+\For{ $e \in E$}{
+  $l(e)=delta / c(e)$\;
+}
+
+
+\While{$D(l)<1$}{
+  \For{ $j = 1$ to $k$}{
+    $d_j \leftarrow d(j)$\;
+    \While{$d_j \neq 0$} {
+      $p \leftarrow \mathrm{shortest\_path(s_j,t_j)}$\;
+      $min\_capacity \leftarrow \infty$\;
+      \For{$e\in p$}{
+        $min\_capacity \leftarrow \min(c(e),min\_capacity)$\;
+      }
+      $f \leftarrow \min(min\_capacity,d_j)$\;
+      \For{$e \in p$}{
+        $e.flow \leftarrow e.flow+f$\;
+        $l(e) \leftarrow l(e) * (1+\epsilon * f / c(e))$\;
+        }
+
+      }
+    }
+}
+\end{algorithm}
+%
+% Restore default vertical spacing
+\SetAlgoSkip{smallskip}

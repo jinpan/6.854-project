@@ -1,2 +1,52 @@
 \section{Heuristics}
-\lipsum[5]
+In this section we present several heuristics that don't speed up the
+theoretical running time but reduce the number of phases or shortest
+path computations in practice.
+\subsection{Demand scaling}
+This heuristic allows us to assume that $\beta\geq 1$. Recall that
+$\beta$ is defined to be the minimum value of
+$\frac{D(i)}{\alpha(i)}$, and is necessary is achieving a bound on
+$\gamma$, the ratio between the primal and dual solutions. That is,
+the number of phases depends on $\beta$. Notice that scaling all
+demands by a factor of $c$ scales $\alpha$ by a factor of $c^{-1}$, so
+scaling all demands by $c$ scales $\beta$ by $c$. If we let $z_j$ be
+the maximum possible flow of commodity $j$, we define $z$ to be the
+maximum fraction of the demands that can be routed independently to
+each commodity. Thus, $\beta$ is bounded above by $z$ and bounded
+below by $\frac{z}{k}$. Thus, we scale each demand by $\frac{k}{z}$
+such that $\frac{z'}{k} =1$ where $z'$ represents a calculation of $z$
+with the updated demands. In doing this, we bound $\beta$ below by
+1. We can then rescale demands accordingly if our procedure doesn't
+stop within $\frac{2}{\epsilon}\log_{1+\epsilon}\frac{m}{1-\epsilon}$
+based on equation EQ [update this later], which implies that
+$\beta\geq 2$, so scaling demands by a factor of 2 maintains
+$\beta\geq 1$. This multiplies the total number of phases by a factor
+o $\log k$ and costs $k\cdot T_{mf}$ where $T_{mf}$ is the time to
+compute a max flow.
+\subsection{2-approximation for Beta estimation}
+This heuristic allows us to greatly reduce the number of phases we
+perform by bounding $\beta$ between 1 and 2. To do this, we first
+compute a 2-approximation to the problem using $O(\log k \log m)$
+phases, and returns a $\hat{\beta}$ such that $\beta\leq \hat{\beta}\leq2\beta$. Then we don't have to scale demands using the above procedure
+and reduces the number of phases to $O(\log m(\log k+\epsilon^{-1})$.
+
+\subsection{Karakosta's method for shared sources}
+This heuristic allows us to remove the depedence upon $k$, the number
+of commodities, using a technique first introduced by Karakosta [CITE]. Since
+we compute shortest paths using a single-source shortest path method,
+with no additional runtime we obtain the minimum cost path from the
+source to all possible sinks. Grouping the commodities by shared
+sources, we can run the iterations for every commodity in a particular
+group at the same time. To do this we make only one call to Djikstra's
+for each group for each step and route a scaled flow along the path
+associated with each commodity. We scale each flow for commodity $j$
+by the ratio of the demand remaining for commodity $j$ to the sum of
+demands remaining for all other commodities within this group. The
+above analysis still holds since we scale at least one edge by a
+factor of $1+\epsilon$ for each step except the last. The number of
+iterations then, is bounded by the number of groups, which is at most
+$n$. Thus our runtime of $O(\omega^{-2}(k\log m+m)\log m T_{sp})$
+becomes $O(\omega^{-2}(m\log m+m)\log m T_{sp})$, or $\~{O}(w^{-2}m^2)$.
+
+\subsection{Multiple routing}
+We'll fill this in once we implement it.
