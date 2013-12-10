@@ -15,7 +15,7 @@ Algorithms we want to use:
 -Algorithm with 2-Approx, karakosta
 -Alogrithm with karakosta
 '''
-
+import sys
 import random
 import pickle
 import time
@@ -247,7 +247,7 @@ def generate_csv(pkl_file_name):
 
 
 if __name__ == '__main__':
-    test = raw_input()
+    test = sys.argv[1]
     if test == "0":
         run_multiple([50, 100, 150, 200], 4, 10, 0.1, [6, 4])
     elif test == "1":
