@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  10 DEC 2013 14:26
+=======
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  10 DEC 2013 11:05
+>>>>>>> Stashed changes
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -749,12 +753,16 @@ LaTeX Font Info:    Font shape `T1/pplx/bx/n' in size <6.25002> not available
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
+<<<<<<< Updated upstream
 ) [5] [6]) (./heuristics.tex) (./results.tex [7]
+=======
+) [5] [6]) (./heuristics.tex
 
 LaTeX Warning: Command \~ invalid in math mode on input line 29.
 
 Missing character: There is no Õ in font pplr9t!
 ) (./results.tex [7]
+>>>>>>> Stashed changes
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 23.
@@ -787,11 +795,19 @@ Package rerunfilecheck Info: File `concurrent_flow.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 137.
  ) 
 Here is how much of TeX's memory you used:
+<<<<<<< Updated upstream
+ 12418 strings out of 493315
+ 185037 string characters out of 6137904
+ 420456 words of memory out of 5000000
+ 15242 multiletter control sequences out of 15000+600000
+ 95047 words of font info for 377 fonts, out of 8000000 for 9000
+=======
  12422 strings out of 493315
  185068 string characters out of 6137904
  419456 words of memory out of 5000000
  15242 multiletter control sequences out of 15000+600000
  95316 words of font info for 380 fonts, out of 8000000 for 9000
+>>>>>>> Stashed changes
  957 hyphenation exceptions out of 8191
  39i,22n,43p,264b,680s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2013/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
@@ -805,7 +821,11 @@ exmf-dist/fonts/type1/public/mathpazo/fplmri.pfb></usr/local/texlive/2013/texmf
 nts/type1/urw/palatino/uplb8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/typ
 e1/urw/palatino/uplr8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/
 palatino/uplri8a.pfb>
+<<<<<<< Updated upstream
+Output written on concurrent_flow.pdf (8 pages, 139038 bytes).
+=======
 Output written on concurrent_flow.pdf (8 pages, 139249 bytes).
+>>>>>>> Stashed changes
 PDF statistics:
  200 PDF objects out of 1000 (max. 8388607)
  178 compressed objects within 2 object streams
