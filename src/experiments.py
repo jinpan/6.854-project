@@ -146,6 +146,7 @@ def run_multiple(numNodes, numEdges, numCommodities, omegas,
     totalData = []
 
     for idx in range(10):
+        print "ITERATION", idx
         outData = {
             'vanilla': [],
             'two_approx': [],
@@ -250,9 +251,9 @@ if __name__ == '__main__':
     if test == "0":
         run_multiple([50, 100, 150, 200], 4, 10, 0.1, [6, 4])
     elif test == "1":
-        run_multiple(10, 40, 10, [1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05], [6, 4])
+        run_multiple(100, 400, 10, [1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05], [6, 4])
     elif test == "2":
-        run_multiple(10, 40, [5, 10, 15], 0.1, [.6, .4])
+        run_multiple(100, 400, [5, 10, 15], 0.1, [.6, .4])
     elif test == "3":
         run_multiple(100, 400, 10, 0.1, [[10], [6, 4], [4, 3, 3], [1] * 10])
 
