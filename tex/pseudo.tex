@@ -5,7 +5,7 @@
 $G \leftarrow (V,E)$\;
 $\epsilon,\delta \leftarrow \mathrm{calculate\_epsilon}(\omega),\mathrm{calculate\_delta}(\omega)$\;
 \For{ $e \in E$}{
-  $l(e)=delta / c(e)$\;
+  $l(e)=\delta / c(e)$\;
 }
 
 
@@ -14,19 +14,27 @@ $\epsilon,\delta \leftarrow \mathrm{calculate\_epsilon}(\omega),\mathrm{calculat
     $d_j \leftarrow d(j)$\;
     \While{$d_j \neq 0$} {
       $p \leftarrow \mathrm{shortest\_path(s_j,t_j)}$\;
-      $min\_capacity \leftarrow \infty$\;
+      $min\_cap \leftarrow \infty$\;
       \For{$e\in p$}{
-        $min\_capacity \leftarrow \min(c(e),min\_capacity)$\;
+        $min\_cap \leftarrow \min(c(e),min\_cap)$\;
       }
       $f \leftarrow \min(min\_capacity,d_j)$\;
+      $d_j \leftarrow d_j - f$\;
       \For{$e \in p$}{
         $e.flow \leftarrow e.flow+f$\;
-        $l(e) \leftarrow l(e) * (1+\epsilon * f / c(e))$\;
+        $l(e) \leftarrow l(e) \cdot (1+\epsilon \cdot f / c(e))$\;
         }
 
       }
     }
+
+$scale\_factor \leftarrow \log_{1+\epsilon}\delta^{-1}$\;
+\For{$e\in E$}{
+  $e.flow = e.flow / scale\_factor$\;
+  }
 }
+\Return{$\mathrm{calculate\_lambda(G)}$}\;
+\caption{GARG-MCF without heuristics}
 \end{algorithm}
 %
 % Restore default vertical spacing

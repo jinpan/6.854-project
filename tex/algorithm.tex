@@ -1,28 +1,42 @@
 \section{Algorithm}
 \subsection{Presentation of algorithm}
-Avoiding the theoretical hangups of the most recent publication
+Avoiding the complicated methods of the most recent publication
 improving the bounds for maximum concurrent flow, we choose to
 implement the maximum concurrent flow FPAS presented by Garg and
 K\"{o}nemann, and several heuristics to speed up runtime in
 practice. The basic implementation gives a runtime of
-$\~{O}(\omega^-2(k+m)m)$. The dependency on $k$ can be removed with
+$\~{O}(\omega^{-2}(k+m)m)$ for the MCF problem. The dependency on $k$
+can be removed with
 the implementation of our heuristics as described later. For the
 remainder of this section, we will describe the algorithm implemented
 in this paper (herein referred to as Garg-MCF), offering both
 pseudocode and a brief look at the analysis. \\
 The main idea behind Garg-MCF relies on the rerouting and fractional
-packing methods described in section 2. The essential ingredients of
-these methods include finding an initial infeasible solution, and then
-rerouting (typically calling to a known combinatorial optimization
-subroutine) based on a length function that grows exponentially in the
-amount that is rerouted. Garg-MCF has been theoretically shown to be
-much faster and simpler than previous algorithms. This simplicity
-makes the algorithm comprehensible. We will be more explicit in how Garg-MCF works
+packing methods introduced in section 2. The intuition behind Garg-MCF
+comes from fractional packing techniques first introduced by Shahrokhi
+and Matula. 
+
+In plain english, we start by assigning a 'length' to each edge
+dependent upon the error term within our approximation $\omega$ and
+the capacity of that edge. Then we repeatedly satisfy the
+demand of each commodity by sending as much flow as we can
+(independently) along the
+shortest path from the source to the sink, where shortest is dependent
+upon the 'length' function. Then we scale the 'length' of each edge by
+a factor dependent upon the amount of flow we just sent across it. In
+this way, the 'length' is exponential in the amount of flow being sent
+across the edge. Intuitively, since we call shortest paths based on
+this length function, this causes us to spread our flow across edges
+and reroute in such a fashion that doesn't force all our flow on one
+path. We stop after the length functions grow 'large enough'. The
+precise definition of 'large enough' and that this computes a $1+\omega$ approximation is not
+entirely obvious, but is believable under the context of the
+analysis. We will be more formal in how Garg-MCF works
 now.
 
 We refer to the second linear program formulation of maximum
 concurrent flow, which we will refer to as P-MCF. Taking the dual of
-P-MCF generates the following linear program, which defines a length
+P-MCF generates the following linear program, which we'll refer to as D-MCF, which defines a length
 $l(e)$ for each edge and a variable $z(j)$ for each commodity.
 \begin{align*}
 \text{min     } \sum_{e\in E}c(e)l(e) \\
@@ -31,120 +45,126 @@ $l(e)$ for each edge and a variable $z(j)$ for each commodity.
 \sum_{j=1}^kd(j)\cdot z(j)\geq 1\\
 l,z\geq 0
 \end{align*}
-Recalling that $\cal{P}_j$ is the set of paths from $s_j$ to
+Recalling that $\mathcal{P}_j$ is the set of paths from $s_j$ to
 $t_j$. Intuitively, the first constraint maintains that, when tight, $z(j)$ is the
 value of the length of the shortest path from $s_j$ to $t_j$. Keeping
 with Garg's notation, we define the objective value to be a function
 of the length assignment $l$:
-$$D(l) := \sum{e\in E} c(e)l(e)$$
+$$D(l) := \sum_{e\in E} c(e)l(e)$$
 and define $\alpha(l)$ as the second constraint:
 $$\alpha(l) := \sum_{j=1}^k d(j)\cdot z(j)$$
+
 Then since we'll have a minimal objective value when the second
 constraint is tight, this LP can be viewed as the assignment of
 positive lengths to edges such that $\frac{D(l)}{\alpha(l)}$ is
-minimized. \\
+minimized. 
+
 With notation in hand, the algorithm runs as follows. We first assign
-a length of $\delta/c(e)$ to each edge, where $\delta$ is carefully picked
+an initial length of $\delta/c(e)$ to each edge, where $\delta$ is carefully picked
 to make the analysis work out. Next we proceed in phases. For each
-phase, we have $k$ iterations. For each iteration, we loop through
-each commodity $j$ and reroute $d(j)$ units of flow from $s_j$ to
+phase, we loop through each commodity $j$ in a series of $k$
+iterations, one for each commodity. For each $j^{th}$ iteration then, we
+consider commodity $j$ and reroute $d(j)$ units of flow from $s_j$ to
 $t_j$. We do this with a series of steps. Let $l_{i,j}^s$ refer to the
-length function at the $i^{th}$ phase, the $j^{th}$ iteration and the
-$s+1^{th}$ step. Then during each step, we compute the minimum cost
-path from $s_j$ to $t_j$ under this length function and route as much
+length function at the $i^{th}$ phase, the $j^{th}$ iteration,
+directly after the $s^{th}$ step. Then during each step, we compute the minimum cost
+path from $s_j$ to $t_j$ under this length function,$l_{i,j}^s$ and route as much
 flow along that path as possible. That is, we wish to route a total of
 $d(j)$ flow from $s_j$ to $t_j$ over all steps during an iteration, so
-let $d_{i,j}^s$ refer to flow remaining to be rerouted during an
-iteration, after $s$ steps. Then for each step, we compute a path $p$,
+let $d^s$ refer to flow remaining to be rerouted during an
+iteration, after $s$ steps. Initially $d^0=d(j)$ and conclude the
+iteration when $d^q=0$ for some $q$. 
+
+Then for each step, we compute a path $p$,
 and we route $f_{i,j}^{s+1}$ flow along this path, where
+$f_{i,j}^{s+1}$ is the maximum allowable flow we can send, or in other
+words, the minimum between the capacity of the minimum capacity edge
+in $p$ and the flow remaining to be sent during this iteration. So
 $$f_{i,j}^{s+1}=\min(\min_{e\in p}(c(e)),d_{i,j}^s)$$
-We then decrease the amount of flow remaining to be routed by
-$f_{i,j}^{s+1}$. Since we routed flow along every edge in $p$, we
+We then decrease the amount of flow remaining to be routed, $d^s$ by
+$f_{i,j}^{s+1}$. Since we routed flow along every edge in $p$, we also
 need to update the length function for these edges, so we do this by
-multiplying $l(e)$ by $1+\epsilon \frac{f_{i,j}^{s+1}}{c(e)}$ for an
-$\epsilon$ that we define later, dependent upon $\omega$. We terminate
+multiplying $l_{i,j}^s(e)$ by $1+\epsilon \frac{f_{i,j}^{s+1}}{c(e)}$ for an
+$\epsilon$ that we define later, dependent upon $\omega$. 
+
+We terminate
 the iteration when $d_{i,j}^p=0$ for some step number $p$. We repeat
 this process for each commodity during an iteration, and we repeat
-phases until we reach our stopping condition, which we define when
-$D(l_{i})\geq 1$. We then have a graph that has flow along edges, but
+phases until we reach our stopping condition, which we define when 
+$D(l_{i,j}^s)\geq 1$. We then have a graph that has flow along edges, but
 is almost surely infeasible. We can scale the flow along each edge by
 dividing flow by $\log_{1+\epsilon}\frac{1}{\delta}$, which makes the
-flow feasible. From here, we can calculate $\lambda$ directly. 
+flow feasible. From here, we can calculate $\lambda$
+directly. Motivation for calculation of $\delta$, $\epsilon$, and the
+final scale factor, $\log_{1+\epsilon}\frac{1}{\delta}$, will be
+briefly described in the next section, and fully derived in the
+original paper. 
 For clarity, we present the pseudocode of this
 algorithm:
 \input{pseudo}
 
-\subsection{Analysis}
-We offer a brief overview of the analysis. A more complete and
-rigorous analysis can be viewed in the original paper. 
-\subsubsection{Approximation Ratio}
-First we claim
-that $\lambda>\frac{t-1}{\log_{1+\epsilon}\frac{1}{\delta}}$ where $t$
-is the stopping phase:
-For every $c(e)$ units of flow routed through each edge $e$, we
-increase the length of $e$ by a factor of $1+\epsilon$. Since the
-initial length is $\frac{\delta}{c(e)}$ and $D(t-1)<1$, so
-$l_{t-1,k}(e)<\frac{1}{c(e)}$. So we can bound the flow through $e$ in
-the first $t-1$ phases is less than
-$\log_{1+\epsilon}\frac{1}{\delta}$. If we scale the flow by the scaling
-factor described above of $\log_{1+e}\frac{1}{\delta}$ we get a
-feasible flow, and have that $$\lambda > \frac{t-1}{\log_{1+\epsilon}\frac{1}{\delta}}$$
-Now if we compare the ratio,$\gamma$, of the value of the primal LP $\lambda$ to the value
-of the dual solution, $\beta$ using the above bound, we get that the
-ratio is strictly less than
-$\frac{\beta}{t-1}\log_{1+\epsilon}\delta^{-1}$. \\
-Now we seek to bound $\frac{\beta}{t-1}$. We examine
-the objective value after the final step of the $j^{th}$ iteration of the $i^{th}$ phase, $D(l_{i,j}^p)$: 
-$$D(l_{i,j}^p) = \sum_{e\in E} c(e)l(e) \leq
-D(l_{i,j-1}^0)+\epsilon d(j) \mathrm{dist_j}(l_{i,j}^p)$$
-where $\mathrm{dist_j}$ defines the length of the shortest path from
-$s_j$ to $t_j$ where the argument defines the length function. This
-follows since we have to route exactly $d(j)$ units of flow along a
-sequence of paths no longer than $\mathrm{dist_j}(l_{i,j}^p)$. We can
-then sum over all iterations within a phase to show 
-$$D(i)\leq D(i-1)+\epsilon \alpha(i)$$ 
-where $D(i)$ refers to the
-objective value after the $i^{th}$ phase, and $\alpha(i)$ refers to
-$\alpha$ after the $i^{th}$ phase. If we define the minimum value of
-$D(i)/\alpha(i)$ to be $\beta$, then we can rewrite this as 
-$$D(i)\leq \frac{D(i-1)}{1-\epsilon/\beta}$$. Since we set all lengths
-initially to $\delta/c(e)$, $D(0)=m\delta$, so we can show that 
-$$D(i)\leq \frac{m\delta}{1-\epsilon} e^{\frac{\epsilon(i-1)}{\beta(1-\epsilon)}}$$
-Assuming that $\beta\geq 1$. This assumption will be lifted in section
-4.
-We stop at the first $t$ such that $D(t)\geq 1$, so we have that 
-$$1\leq \frac{m\delta}{1-\epsilon}
-e^{\frac{\epsilon(t-1)}{\beta(1-\epsilon)}}$$
-which can be rearranged to bound $\frac{\beta}{t-1}$ above by
-$\frac{\epsilon}{(1-\epsilon)ln\frac{1-\epsilon}{m\delta}}$.\\
-So now we have that
-$\gamma<\frac{\beta}{t-1}\log_{1+\epsilon}\delta^{-1}$ we can plug in
-the bound for $\frac{beta}{t-1}$. By setting 
-$$\delta = (m \cdot (1-\epsilon)^{-1})^{\frac{-1}{\epsilon}})$$
-and working through the mathematics, we show that $\gamma \leq
-(1-\epsilon)^{-3}$.
-Thus we can pick an $\epsilon$ such that $(1-\epsilon)^{-3}$ is no
-more than the approximation ratio $1+\omega$. \\
-\subsubsection{Runtime}
-Finally we argue for runtime. It is enough to bound the number of
-steps for each iteration, and the number of phases. We start with
-steps.\\
-For each step except the last one per iteration, we increase the
-length of at least one edge by a factor of $1+\epsilon$. Since each
-edge has length between $\delta$ and $1+\epsilon$, we can do no more
-than $m\log_{1+\epsilon}\frac{delta}{1+\epsilon}$ steps total, plus
-one more step for each iteration. We bound the total number of
-iterations as $k$ times the number of phases. The number of phases,
-then is $t$ such that 
-$$1<\frac{Beta}{t-1}\log_{1+\epsilon}\delta^{-1}$$
-where this above inequality comes from our bound on $\gamma$ and weak
-duality for LP's, thus the number of phases is less than
-$1+\beta\log_{1+\epsilon}\delta^{-1}$ so we have that 
-$$t=\lceil \frac{\beta}{\epsilon}\log_{1+\epsilon}
-\frac{m}{1-\epsilon} \rceil$$.
-Using the $\beta$ scaling trick we will describe in the next section,
-we can show that the total number of phases is at most $T\log k$ where 
-$$T=\frac{2}{\epsilon} \log_{1+\epsilon}\frac{m}{1-\epsilon}$$.
+\section{Analysis}
+We offer a brief, high-level overview of the analysis. We point the
+reader to the original paper for a more in-depth analysis.
+\subsection{Approximation Ratio}
+To prove the correctness of Garg-MCF, we care about approximating a
+feasible solution to the dual LP, D-MCF. The key idea here is compare
+our calculated $\lambda$ value to the best-possible solution to the
+dual LP, D-MCF. Bounding this ratio above by $(1+\omega)$ will attain
+the appropriate approximation ratio, since the ratio is bounded below
+by 1, acconding to weak duality. We'll briefly describe how this is
+done below.
+
+We first assume that the
+optimal objective value, $\beta$, will be at least 1. We can remove this
+assumption later. Then we notice a relation between the objective
+value at phase $i$ and phase $i-1$ and use this to establish a bound
+on the optimal objective value divided by the number of phases we must
+run through to reach our stopping condition. We next can create a
+lower bound for $\lambda$ using the knowledge of how much flow we must
+route through each edge up to the penultimate phase. It is here that
+our scaling factor is derived, and a lower bound for $\lambda$
+established dependent on the number of phases completed and
+$\epsilon$. 
+
+Now we can consider the ratio between $\lambda$ and the solution to
+D-MCF, since we have bounds on both terms. If we can show that
+$\beta/\lambda\leq \text{poly}(\epsilon)$ then by weak duality we have
+that $\lambda \leq \beta$, so our computed $\lambda$ is within a
+factor of $\text{poly}(\epsilon)$ of $\beta$. Strong duality holds
+that $\beta$ is the value of the optimal solution to MCF. With the
+math of the paper  we arrive at the claim that 
+$$\frac{\beta}{\lambda}\leq (1-\epsilon)^{-3}$$
+Thus, if we choose $\epsilon$ such that 
+$$(1-\epsilon)^{-3}\leq 1+\omega$$ 
+we arrive at our desired $1+\omega$ approximation.
+\subsection{Scaling Beta}
+We now lift the previous assumption that $\beta\geq 1$. The key idea
+here is that by scaling all the demands by a constant factor, we also
+scale the value of the optimal $\lambda$, and therefore $\beta$. We
+find bounds above and below for $\beta$ based on the current demand
+scheme, and then scale the demands such that the lower bound for
+$\beta$ is 1. It turns out that for any phase number $i$ in which the
+algorithm has not yet terminated, $i$ is strictly less than
+$\frac{\beta}{\epsilon}\log_{1+\epsilon}\frac{m}{1-\epsilon}$. Then we
+can run phases until we have computed enough
+phases to ensure that $\beta\geq 2$, a number we'll call $T$. In this case
+we scale demands of
+all commodities, effectively reducing $\beta$ by a factor of
+two. If the ratio of the upper bound and lower bound for $\beta$ was
+initially $c$, then we have to run for at most $T\log c$ phases.
+\subsection{Running time}
+The scaling of $\beta$ gives us a bound on the number of phases we
+must compute. In each phase, we compute $k$ iterations, so all that is
+left is to bound the number of steps per iteration. The key idea here
+is that $l(e)c(e)$ is $\delta$ for each edge $e$ initially, and no
+more than $1+\epsilon$ at termination, since we terminate as soon as
+$\sum_el(e)c(e)\geq 1$ and we scale each edge by no more than
+$1+\epsilon$ each time we scale. Thus the number of steps is at most
+$m\log_{1+\epsilon}\frac{m}{1-\epsilon}$ plus the number of
+iterations. Putting this all together, we end up with a runtime of 
+$$O(\omega^{-2}(k\log m+m)\log m)T_{sp})$$ where $T_{sp}$ is the time to
+compute a single-source shortest path subroutine.
 
 
 
