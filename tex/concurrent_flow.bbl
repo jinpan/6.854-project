@@ -1,0 +1,48 @@
+\begin{thebibliography}{1}
+
+\bibitem{garg}
+Naveen Garg and Jochen Koenemann.
+\newblock Faster and simpler algorithms for multicommodity flow and other
+  fractional packing problems.
+\newblock {\em SIAM Journal on Computing}, 37(2):630--652, 2007.
+
+\bibitem{goldberg}
+Andrew~V Goldberg, Jeffrey~D Oldham, Serge Plotkin, and Cliff Stein.
+\newblock {\em An implementation of a combinatorial approximation algorithm for
+  minimum-cost multicommodity flow}.
+\newblock Springer, 1998.
+
+\bibitem{grig}
+Michael~D Grigoriadis and Leonid~G Khachiyan.
+\newblock Approximate minimum-cost multicommodity flows in $\tilde{O}(\epsilon-
+  2 knm)$ time.
+\newblock {\em Mathematical Programming}, 75(3):477--482, 1996.
+
+\bibitem{karakostas}
+George Karakostas.
+\newblock Faster approximation schemes for fractional multicommodity flow
+  problems.
+\newblock In {\em Proceedings of the thirteenth annual ACM-SIAM symposium on
+  Discrete algorithms}, pages 166--173. Society for Industrial and Applied
+  Mathematics, 2002.
+
+\bibitem{karger}
+David Karger and Serge Plotkin.
+\newblock Adding multiple cost constraints to combinatorial optimization
+  problems, with applications to multicommodity flows.
+\newblock In {\em Proceedings of the twenty-seventh annual ACM symposium on
+  Theory of computing}, pages 18--25. ACM, 1995.
+
+\bibitem{almostLinear}
+Jonathan~A. Kelner, Lorenzo Orecchia, Yin~Tat Lee, and Aaron Sidford.
+\newblock An almost-linear-time algorithm for approximate max flow in
+  undirected graphs, and its multicommodity generalizations.
+\newblock {\em CoRR}, abs/1304.2338, 2013.
+
+\bibitem{leighton}
+Tom Leighton, Fillia Makedon, Serge Plotkin, Clifford Stein, {\'E}va Tardos,
+  and Spyros Tragoudas.
+\newblock Fast approximation algorithms for multicommodity flow problems.
+\newblock {\em Journal of Computer and System Sciences}, 50(2):228--243, 1995.
+
+\end{thebibliography}

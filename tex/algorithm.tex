@@ -5,20 +5,16 @@ improving the bounds for maximum concurrent flow, we choose to
 implement the maximum concurrent flow FPAS presented by Garg and
 K\"{o}nemann, and several heuristics to speed up runtime in
 practice. The basic implementation gives a runtime of
-$\~{O}(\omega^{-2}(k+m)m)$ for the MCF problem \cite{garg}. The dependency on $k$
+$\tilde{O}(\omega^{-2}(k+m)m)$ for the MCF problem \cite{garg}. The dependency on $k$
 can be removed with
 the implementation of our heuristics as described later. For the
 remainder of this section, we will describe the algorithm implemented
 in this paper (herein referred to as Garg-MCF), offering both
 pseudocode and a brief look at the analysis. \\
 The main idea behind Garg-MCF relies on the rerouting and fractional
-packing methods introduced in section 2. The intuition behind Garg-MCF
-comes from fractional packing techniques first introduced by Shahrokhi
-and Matula. 
-
-In plain english, we start by assigning a 'length' to each edge
-dependent upon the error term within our approximation $\omega$ and
-the capacity of that edge. Then we repeatedly satisfy the
+packing methods introduced in section 2. In plain english, we compute a $(1+\omega)$ approxmation as follows. We start by assigning a 'length' to each edge
+dependent upon $\omega$ and
+the capacity of that edge. We repeatedly satisfy the
 demand of each commodity by sending as much flow as we can
 (independently) along the
 shortest path from the source to the sink, where shortest is dependent
@@ -34,7 +30,7 @@ entirely obvious, but is believable under the context of the
 analysis. We will be more formal in how Garg-MCF works
 now.
 
-We refer to the second linear program formulation of maximum
+Consider the second linear program formulation of maximum
 concurrent flow, which we will refer to as P-MCF. Taking the dual of
 P-MCF generates the following linear program, which we'll refer to as D-MCF, which defines a length
 $l(e)$ for each edge and a variable $z(j)$ for each commodity.
@@ -51,7 +47,7 @@ value of the length of the shortest path from $s_j$ to $t_j$. Keeping
 with Garg's notation, we define the objective value to be a function
 of the length assignment $l$:
 $$D(l) := \sum_{e\in E} c(e)l(e)$$
-and define $\alpha(l)$ as the second constraint:
+and define $\alpha(l)$ as the second constraint, also a function of the length assignment $l$:
 $$\alpha(l) := \sum_{j=1}^k d(j)\cdot z(j)$$
 
 Then since we'll have a minimal objective value when the second
@@ -65,7 +61,7 @@ to make the analysis work out. Next we proceed in phases. For each
 phase, we loop through each commodity $j$ in a series of $k$
 iterations, one for each commodity. For each $j^{th}$ iteration then, we
 consider commodity $j$ and reroute $d(j)$ units of flow from $s_j$ to
-$t_j$. We do this with a series of steps. Let $l_{i,j}^s$ refer to the
+$t_j$. We do this with a series of steps, updating the length after each step. Let $l_{i,j}^s$ refer to the
 length function at the $i^{th}$ phase, the $j^{th}$ iteration,
 directly after the $s^{th}$ step. Then during each step, we compute the minimum cost
 path from $s_j$ to $t_j$ under this length function,$l_{i,j}^s$ and route as much
@@ -92,11 +88,11 @@ the iteration when $d_{i,j}^p=0$ for some step number $p$. We repeat
 this process for each commodity during an iteration, and we repeat
 phases until we reach our stopping condition, which we define when 
 $D(l_{i,j}^s)\geq 1$. We then have a graph that has flow along edges, but
-is almost surely infeasible. We can scale the flow along each edge by
-dividing flow by $\log_{1+\epsilon}\frac{1}{\delta}$, which makes the
+almost surely overflows capacity bounds. We can scale the flow along each edge by
+dividing flow by $\log_{1+\epsilon}\delta^{-1}$, which makes the
 flow feasible. From here, we can calculate $\lambda$
 directly. Motivation for calculation of $\delta$, $\epsilon$, and the
-final scale factor, $\log_{1+\epsilon}\frac{1}{\delta}$, will be
+final scale factor, $\log_{1+\epsilon}\delta^{-1}$, will be
 briefly described in the next section, and fully derived in the
 original paper. 
 For clarity, we present the pseudocode of this
@@ -108,11 +104,11 @@ We offer a brief, high-level overview of the analysis. We point the
 reader to the original paper for a more in-depth analysis.
 \subsection{Approximation Ratio}
 To prove the correctness of Garg-MCF, we care about approximating a
-feasible solution to the dual LP, D-MCF. The key idea here is compare
+feasible solution to the dual LP, D-MCF. The key idea here is to compare
 our calculated $\lambda$ value to the best-possible solution to the
 dual LP, D-MCF. Bounding this ratio above by $(1+\omega)$ will attain
 the appropriate approximation ratio, since the ratio is bounded below
-by 1, acconding to weak duality. We'll briefly describe how this is
+by 1, according to weak duality. We'll briefly sketch how this is
 done below.
 
 We first assume that the
@@ -160,7 +156,7 @@ left is to bound the number of steps per iteration. The key idea here
 is that $l(e)c(e)$ is $\delta$ for each edge $e$ initially, and no
 more than $1+\epsilon$ at termination, since we terminate as soon as
 $\sum_el(e)c(e)\geq 1$ and we scale each edge by no more than
-$1+\epsilon$ each time we scale. Thus the number of steps is at most
+$1+\epsilon$ each time we scale. Thus, if we set $\delta$ to $(m/(1-\epsilon))^{-1/\epsilon}$, the number of steps is at most
 $m\log_{1+\epsilon}\frac{m}{1-\epsilon}$ plus the number of
 iterations. Putting this all together, we end up with a runtime of 
 $$O(\omega^{-2}(k\log m+m)\log m)T_{sp})$$ where $T_{sp}$ is the time to

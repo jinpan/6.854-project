@@ -7,7 +7,7 @@ This heuristic allows us to greatly reduce the number of phases we
 perform by bounding $\beta$ between 1 and 2. To do this, we first
 compute a 2-approximation to the problem using $O(\log k \log m)$
 phases, and returns a $\hat{\beta}$ such that $\beta\leq \hat{\beta}\leq2\beta$. Then we don't have to scale demands using the above procedure
-and reduces the number of phases to $O(\log m(\log k+\epsilon^{-1})$.
+and reduces the number of phases to $O(\log m(\log k+\epsilon^{-1}))$.
 
 \subsection{Karakosta's method for shared sources}
 This heuristic allows us to remove the depedence upon $k$, the number
@@ -26,4 +26,4 @@ above analysis still holds since we scale at least one edge by a
 factor of $1+\epsilon$ for each step except the last. The number of
 iterations then, is equivalent to the number of groups, which is at most
 $n$. Thus our runtime of $O(\omega^{-2}(k\log m+m)\log m T_{sp})$
-becomes $O(\omega^{-2}(n\log m+m)\log m T_{sp})$, or $\~{O}(w^{-2}m^2)$.
+becomes $O(\omega^{-2}(n\log m+m)\log m T_{sp})$, or $\tilde{O}(w^{-2}m^2)$.
