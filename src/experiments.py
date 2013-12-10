@@ -90,12 +90,6 @@ def check_iterable(obj):
 def run_multiple(numNodes, numEdges, numCommodities, omegas,
                  commodityDistributions, heuristic=None):
     start_time = int(time.time())
-    outData = {
-        'vanilla': [],
-        'two_approx': [],
-        'karakosta': [],
-        'two_approx_karakosta': [],
-    }
 
     def run_vanilla(edge, commodity, omega):
         vanilla_start = time.time()
@@ -149,8 +143,15 @@ def run_multiple(numNodes, numEdges, numCommodities, omegas,
             run_karakosta(edge, commodity, omega)
             run_two_approx_karakosta(edge, commodity, omega)
 
+    totalData = []
+
     for idx in range(10):
-        print "ITERATION", idx
+        outData = {
+            'vanilla': [],
+            'two_approx': [],
+            'karakosta': [],
+            'two_approx_karakosta': [],
+        }
         if check_iterable(numNodes):
             outFile = 'data3/nodes.pkl'
             omega = omegas
@@ -186,8 +187,9 @@ def run_multiple(numNodes, numEdges, numCommodities, omegas,
                                                        numCommodities,
                                                        distribution)
                 individual_loop(edge, commodity, omega)
+        totalData.append(outData)
 
-        pickle.dump(outData, open(outFile + '_%d' % start_time,'wb'))
+        pickle.dump(totalData, open(outFile + '_%d' % start_time,'wb'))
 
 
 def run_series(numNodes, numEdges, numCommodities, outFile, omegas,
@@ -246,11 +248,11 @@ def generate_csv(pkl_file_name):
 if __name__ == '__main__':
     test = raw_input()
     if test == "0":
-        run_multiple([50, 100, 150, 200], 4, 10, 0.3, [4, 3, 3], heuristic="vanilla")
+        run_multiple([50, 100, 150, 200], 4, 10, 0.1, [6, 4])
     elif test == "1":
-        run_multiple(10, 40, 10, [1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05], [4, 3, 3], heuristic="vanilla")
+        run_multiple(10, 40, 10, [1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05], [6, 4])
     elif test == "2":
-        run_multiple(10, 40, [5, 10, 15], 0.1, [.6, .4], heuristic="vanilla")
+        run_multiple(10, 40, [5, 10, 15], 0.1, [.6, .4])
     elif test == "3":
-        run_multiple(100, 400, 10, 0.1, [[10], [5, 5], [4, 3, 3], [1] * 10], heuristic="vanilla")
+        run_multiple(100, 400, 10, 0.1, [[10], [6, 4], [4, 3, 3], [1] * 10])
 
