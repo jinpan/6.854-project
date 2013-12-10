@@ -2,42 +2,41 @@
 
 The multicommodity flow problem requires routing multiple commodities
 from their respective sources to their respective sinks along a
-directed graph so that the net flow across all commodities on any
-single edge does not exceed the capacity of that edge. Multicommodity
+directed graph. It also requires that the net flow across all commodities on any
+single edge does not exceed the capacity of that edge and that flow is conserved. Multicommodity
 flow problems arise in many different contexts where distinct
 resources need to be routed across a network. For example,
 multicommodity flow problems are solved when routing across
-communication networks or determining transportation of goods. [CITE]
+communication networks or determining transportation of goods.
 
-Historically, this problem and its many variants can be expressed as a
-large linear program. This allows the multitude of linear programming 
-algorithms to solve this problem exactly in a theoretically
-polynomial. The structure of this problem has been used to modify
+Historically, this problem and its many variants have been expressed as a
+large linear program. This allows us to use the multitude of linear programming 
+algorithms to solve this problem exactly in polynomial time. The
+structure of this problem has been used to modify
 interior point methods to generate faster runtimes in practice, but
 the size of the linear program quickly gets prohibitively large. In
 practice, fully polynomial approximation schemes can very closely
 approximate a solution to the multicommodity flow problem, even for
 large problem instances. In practice, getting within $1\%$ or even
 $5\%$ of the optimal solution is often good enough, and can be
-attained much more quickly with approximation schemes than with linear
+attained much more quickly than with linear
 programming methods. These fully polynomial approximation schemes
 often rely on subroutines which can be efficiently computed in
 practice, such as minimum cost flow or single-source shortest paths.
 
 In this paper, we implement an algorithm for solving multicommodity
-flow variants first introduced by Garg in 2007 [CITE]. Specifically, we offer
+flow variants first introduced by Garg in 2007 [CITE].%\cite{garg}
+Specifically, we offer
 an implementation solving the maximum concurrent flow problem. We also
 implement several heuristics that take advantage of certain features
-of a problem instance to further speed up the algorithm, both in
-theory and practice. The paper is organized as follows. In section 2
+of a problem instance to further speed up the algorithm in
+practice. The paper is organized as follows. In section 2
 we formally present the problem and define maximum concurrent flow in
 addition to discussing previous contributions towards creating an
 efficient fully polynomial approximation scheme for this problem. In
 section 3, we present the algorithm and offer a brief analysis of its
 runtime and correctness. In section 4, we present several heuristics
 implemented to speed up runtime in practice. Section 5 contains our
-description of our implementation, experiments as well as the
-experimental results and discussion. We include a real-world
-application of our algorithm in section 6, and finally conclude in
-section 7.
+description of our implementation, experiments, results and
+discussion.  Finally we offer our concluding remarks in section 6.
 
