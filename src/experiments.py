@@ -70,7 +70,7 @@ def prepare_random_input(numNodes,numEdges,numCommodities,commodityDistribution=
     return edgeList, commodities
 
 
-def run_series(numNodes,numEdges,numCommodities,outFile,omegas,commodityDistribution = None):
+def run_series(numNodes,numEdges,numCommodities,outFile,omegas,commodityDistribution=None,scale_beta=False,karakosta=False):
     outData = {}
     for i in xrange(10):
         edgeList,commodities = prepare_random_input(numNodes,numEdges,
@@ -79,8 +79,32 @@ def run_series(numNodes,numEdges,numCommodities,outFile,omegas,commodityDistribu
         for omega in omegas:
             print "ITERATION: " + str(i) + "  OMEGA: " + str(omega)
             now = time.time()
-            spc,iterations = maximum_concurrent_flow(edgeList,commodities,error=omega,scale_beta=False,karakosta=False)
+            spc,iterations = maximum_concurrent_flow(edgeList,commodities,error=omega,scale_beta=scale_beta,karakosta=karakosta)
             if omega not in outData: outData[omega] = []
             outData[omega].append((spc,iterations,time.time()-now))
     pickle.dump(outData,open(outFile,'wb'))
+
+
+def generate_csv(pkl_file_name):
+    data = pickle.load(open(pkl_file_name))
+
+    averaged_data = {}
+    for omega, datum in data.iteritems():
+        spc_total, iterations_total, seconds_total = 0., 0., 0.
+
+        for spc, iterations, seconds in datum:
+            spc_total += float(spc)
+            iterations_total += float(iterations)
+            seconds_total += float(iterations)
+
+        spc_total /= len(datum)
+        iterations_total /= len(datum)
+        seconds_total /= len(datum)
+
+        averaged_data[omega] = (spc_total, iterations_total, seconds_total)
+    
+    with open(pkl_file_name.rstrip('pkl') + 'csv', 'w') as f:
+        f.write('w, num_shortest_paths, num_iterations, num_seconds')
+        for key in sorted(averaged_data.keys(), reverse=True):
+            f.write('%s, %s, %s, %s\n' % ((key, ) + averaged_data[key]))
 

@@ -1,4 +1,6 @@
 src/ENV/
 src/__pycache__/
 *.pyc
+*~
+*#
 
