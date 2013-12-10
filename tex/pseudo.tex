@@ -27,12 +27,12 @@ $\epsilon,\delta \leftarrow \mathrm{calculate\_epsilon}(\omega),\mathrm{calculat
 
       }
     }
-
+}
 $scale\_factor \leftarrow \log_{1+\epsilon}\delta^{-1}$\;
 \For{$e\in E$}{
   $e.flow = e.flow / scale\_factor$\;
   }
-}
+
 \Return{$\mathrm{calculate\_lambda(G)}$}\;
 \caption{GARG-MCF without heuristics}
 \end{algorithm}

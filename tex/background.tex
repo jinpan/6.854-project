@@ -77,7 +77,7 @@ developed.
 
 The first fully polynomial approximation schemes (FPAS) for solving
 multi-commodity flow problems and their variants arose in the early
-90's with Leighton et. al [CITE]. %\cite{leighton}
+90's with Leighton et. al \cite{leighton}.
 Typically, variants of multi-commodity flow problems have often been
 solved with similar techniques. That is, the tricks that tend to work
 well for solving one variant of a multi-commodity flow problem can
@@ -95,10 +95,10 @@ interior-point methods for solving LP's, but it was several years
 after the development of the theoretical development of
 the first FPAS's that an efficient implementation was developed,
 attaining a speed two-to-three orders of magnitude faster than
-state-of-the-art linear program solvers [CITE] %\cite{goldberg}.
+state-of-the-art linear program solvers \cite{goldberg}.
 The main idea of how
 these early FPAS' work is a rerouting method, generalizing on
-fractional packing techniques[CITE-karger abstract] %\cite{karger}.
+fractional packing techniques \cite{karger}.
 Initially, the
 algorithm finds an initial flow satisfying the demands, but possibly
 violating the capacities. Then the algorithm repeatedly
@@ -110,11 +110,11 @@ making the cost of an edge exponential in the amount of flow routed
 through it. The 'goodness' of the reroutings are stored in a potential function, which
 is guaranteed to generate a $1+\omega$ solution in
 $\~{O}(\omega^{-3}kmn)$ time for the minimum cost multi-commodity flow
-problem [CITE]%\cite{karger}. 
+problem \cite{karger}. 
 Since then, these bounds have since been increased to
-$\~{O}(\omega^{-2}m^2)$ in 2000[Cite]%\cite{grigoriadis}. 
+$\~{O}(\omega^{-2}m^2)$ in 2000 \cite{grig}. 
 The current state-of-the-art
 bound for maximum concurrent multicommodity flow in $O(k^2 \omega^2
 2^{o(\sqrt(\log|V| \log\log |V|))})$, using a combination of a
 non-Euclidean generalization of gradient descent, flow sparsifiers,
-and an $O(m^{o(1)})$-competitive oblivious routing scheme [cite].%\cite{almostLinear}
+and an $O(m^{o(1)})$-competitive oblivious routing scheme \cite{almostLinear}.

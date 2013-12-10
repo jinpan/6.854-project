@@ -157,12 +157,15 @@ def calculate_demand_ratios(commodities, demands=None):
 
 
 def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
-                            scale_beta=True, returnBeta=False,
+                            scale_beta=False, returnBeta=False,
                             karakosta = False, shortestPathComputations=0):
     '''
     Takes in an iterable of edges and commodities and calculates the maximum
     concurrent flow
     '''
+    twoApprox = False
+    if shortestPathComputations!=0:
+        twoApprox = True
     #calculate parameters
     epsilon = calculate_epsilon(error)
     delta = calculate_delta(len(edges), epsilon)
@@ -210,7 +213,7 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
             old_objective = current_objective
 
         count += 1 
-        if count % 10 == 0:
+        if count % 1000 == 0:
             print count, current_objective
             
         if scale_beta and count % t == 0:  # for scaling
@@ -277,7 +280,7 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
             edge_dict[FLOW_ATTRIBUTE] = edge_dict.get(FLOW_ATTRIBUTE, 0) / (log(1. / delta) / log(1 + epsilon))
-
+    print "SPC-"+str(karakosta)+"-"+str(twoApprox)+ " for G(" + str(len(G.node.keys()))+","+str(len(edges))+") w/ error " + str(error)+ ": " + str(shortestPathComputations)
     return shortestPathComputations,count
 
 

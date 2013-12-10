@@ -35,7 +35,7 @@ class TestCase1():
 
 
 tc1 = TestCase1()
-if True:
+if False:
     for demand in [7,.7,70]:
         result =  tc1.run_max_concurrent_flow(demand) #Beta = 3/7
         
@@ -60,16 +60,24 @@ class TestCase2():
     def run_max_concurrent_flow(self,demand1,demand2):
         peas = Commodity("S","3",demand1)
         carrots = Commodity("S","6",demand2)
-
         return maximum_concurrent_flow(self.edgeList,[peas,carrots],karakosta=False)
-
 
     def run_two_approx(self,demand1,demand2):
         commodities = [Commodity("S","3",demand1),Commodity("S","6",demand2)]
         return two_approx(self.edgeList,commodities)
 
+
+    def run_karakostas(self, demand1,demand2):
+        commodities = [Commodity("S","3",demand1),Commodity("S","6",demand2)]
+        return maximum_concurrent_flow(self.edgeList,commodities,karakosta=True)
+    
+    def run_both(self, demand1,demand2):
+        commodities = [Commodity("S","3",demand1),Commodity("S","6",demand2)]
+        return two_approx(self.edgeList,commodities,karakosta=True)
+    
+
 tc2 = TestCase2()
-if False:
+if True:
     for demand in [(1,.5),(10,10),(4,4)]:
 
         result = tc2.run_max_concurrent_flow(demand[0],demand[1])    
@@ -80,6 +88,14 @@ if False:
         result = tc2.run_two_approx(demand[0],demand[1])
  #       print min(result['2']['3']['_flow']/demand[0],result['5']['6']['_flow']/demand[1])
         print result
+
+        print ("\n Karakostas \n")
+        result = tc2.run_karakostas(demand[0],demand[1])
+
+        print result
+
+        print ("\n Both \n")
+        result = tc2.run_both(demand[0],demand[1])
 
 
 
