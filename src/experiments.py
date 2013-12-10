@@ -83,6 +83,100 @@ def prepare_random_input(numNodes,numEdges,numCommodities,commodityDistribution=
     return edgeList, commodities
 
 
+def check_iterable(obj):
+    return hasattr(obj, '__iter__')
+
+
+def run_multiple(numNodes, numEdges, numCommodities, omegas,
+                 commodityDistributions):
+    start_time = int(time.time())
+    outData = {
+        'vanilla': [],
+        'two_approx': [],
+        'karakosta': [],
+        'two_approx_karakosta': [],
+    }
+
+    def individual_loop(edge, commodity, omega):
+        vanilla_start = time.time()
+        try:
+            spc, iterations = maximum_concurrent_flow(edge, commodity, omega)
+        except:
+            spc, iterations = None, None
+        vanilla_end = time.time() - vanilla_start
+        outData['vanilla'].append((spc, iterations, vanilla_end))
+        print "finished vanilla in", vanilla_end, "seconds"
+
+        two_approx_start = time.time()
+        try:
+            spc, iterations = two_approx(edge, commodity, omega)
+        except:
+            spc, iterations = None, None
+        two_approx_end = time.time() - two_approx_start
+        outData['two_approx'].append((spc, iterations, two_approx_end))
+        print "finished two_approx in", two_approx_end, "seconds"
+
+        karakosta_start = time.time()
+        try:
+            spc, iterations = maximum_concurrent_flow(edge, commodity,
+                                                      omega, karakosta=True)
+        except:
+            spc, iterations = None, None
+        karakosta_end = time.time() - karakosta_start
+        outData['karakosta'].append((spc, iterations, karakosta_end))
+        print "finished karakosta in", karakosta_end, "seconds"
+
+        two_approx_karakosta_start = time.time()
+        try:
+            spc, iterations = two_approx(edge, commodity, omega, karakosta=True)
+        except:
+            spc, iterations = None, None
+        two_approx_karakosta_end = time.time() - two_approx_karakosta_start
+        outData['two_approx_karakosta'].append((spc, iterations,
+                                                two_approx_karakosta_end))
+        print "finished two_approx_karakosta in", two_approx_karakosta_end, "seconds"
+
+    for idx in range(10):
+        print "ITERATION", idx
+        if check_iterable(numNodes):
+            outFile = 'data3/nodes.pkl'
+            omega = omegas
+            for node in numNodes:
+                edges = numEdges * node
+                edge, commodity = prepare_random_input(node, edges,
+                                                       numCommodities,
+                                                       commodityDistributions)
+                individual_loop(edge, commodity, omega)
+        elif check_iterable(omegas):
+            outFile = 'data3/omegas.pkl'
+            node = numNodes
+            edge, commodity = prepare_random_input(node, numEdges,
+                                                   numCommodities,
+                                                   commodityDistributions)
+            for omega in omegas:
+                individual_loop(edge, commodity, omega)
+        elif check_iterable(numCommodities):
+            outFile = 'data3/commodities.pkl'
+            node, omega = numNodes, omegas
+            for commodity in numCommodities:
+                distribution = [int(commodity * x) for x in
+                                commodityDistributions]
+                edge, commodity = prepare_random_input(node, numEdges,
+                                                       commodity,
+                                                       distribution,)
+                individual_loop(edge, commodity, omega)
+        elif check_iterable(commodityDistributions):
+            outFile = 'data3/distributions.pkl'
+            node, omega = numNodes, omegas
+            for distribution in commodityDistributions:
+                edge, commodity = prepare_random_input(node, numEdges,
+                                                       numCommodities,
+                                                       distribution)
+                individual_loop(edge, commodity, omega)
+
+        pickle.dump(outData, open(outFile + '_%d' % start_time,'wb'))
+
+
 def run_series(numNodes, numEdges, numCommodities, outFile, omegas,
                commodityDistribution=None, two_factor=False, karakosta=False,
                multi_route=False):
@@ -134,4 +228,16 @@ def generate_csv(pkl_file_name):
         f.write('w, num_shortest_paths, num_iterations, num_seconds')
         for key in sorted(averaged_data.keys(), reverse=True):
             f.write('%s, %s, %s, %s\n' % ((key, ) + averaged_data[key]))
+
+
+if __name__ == '__main__':
+    test = raw_input()
+    if test == "0":
+        run_multiple([50, 100, 150, 200], 4, 10, 0.1, [4, 3, 3])
+    elif test == "1":
+        run_multiple(100, 400, 10, [1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05], [4, 3, 3])
+    elif test == "2":
+        run_multiple(10, 40, [10, 20, 40, 80], 0.1, [.4, .3, .3])
+    elif test == "3":
+        run_multiple(100, 400, 10, 0.1, [[10], [5, 5], [4, 3, 3], [1] * 10])
 

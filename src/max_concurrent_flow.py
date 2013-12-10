@@ -204,13 +204,13 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
         if current_objective >= 1: break
 
         if old_objective >= calculate_dual_objective(G):
-            raise "Not converging"
+            raise Exception
         else:
             old_objective = current_objective
 
         count += 1 
-        if current_objective == 0.0: raise "TOO SMALL ERROR"
-        print count, current_objective
+        if count % 100 == 0:
+            print count, current_objective
             
         if scale_beta and count % t == 0:  # for scaling
             scale_demands(commodities, 2)
