@@ -166,6 +166,7 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
     #calculate parameters
     epsilon = calculate_epsilon(error)
     delta = calculate_delta(len(edges), epsilon)
+    print "Epislon, Delta: ", epsilon, delta
 
     #set initial edge lengths
     for edge in edges:
@@ -182,7 +183,7 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
         t = int(t)  # t is iteration threshold
         scale_demands(commodities, k/z)  # so z/k is 1
     
-    count = 0 
+    count = -1
     #start iterations
     
     # group commodities by source if karakosta
@@ -199,7 +200,7 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
             commoditiesGroupedBySource[commoditySource] = commoditySourceList
 
     old_objective = -1
-    while calculate_dual_objective(G) < 1:  # phases
+    while True:  # phases
         current_objective = calculate_dual_objective(G)
         if current_objective >= 1: break
 
@@ -209,7 +210,7 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
             old_objective = current_objective
 
         count += 1 
-        if count % 100 == 0:
+        if count % 10 == 0:
             print count, current_objective
             
         if scale_beta and count % t == 0:  # for scaling
@@ -281,7 +282,7 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
 
 
 def two_approx(edges, commodities, error=GLOBAL_ERROR, karakosta=False):
-    spc, beta_hat = maximum_concurrent_flow(edges, commodities ,error=1., returnBeta=True, karakosta=karakosta)
+    spc, beta_hat = maximum_concurrent_flow(edges, commodities, error=1., returnBeta=True, karakosta=karakosta)
     scale_demands(commodities, beta_hat / 2.)
     return maximum_concurrent_flow(edges, commodities, error=error, scale_beta=False, karakosta=karakosta, shortestPathComputations=spc)
 

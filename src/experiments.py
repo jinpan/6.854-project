@@ -88,7 +88,7 @@ def check_iterable(obj):
 
 
 def run_multiple(numNodes, numEdges, numCommodities, omegas,
-                 commodityDistributions):
+                 commodityDistributions, heuristic=None):
     start_time = int(time.time())
     outData = {
         'vanilla': [],
@@ -97,7 +97,7 @@ def run_multiple(numNodes, numEdges, numCommodities, omegas,
         'two_approx_karakosta': [],
     }
 
-    def individual_loop(edge, commodity, omega):
+    def run_vanilla(edge, commodity, omega):
         vanilla_start = time.time()
         try:
             spc, iterations = maximum_concurrent_flow(edge, commodity, omega)
@@ -107,6 +107,7 @@ def run_multiple(numNodes, numEdges, numCommodities, omegas,
         outData['vanilla'].append((spc, iterations, vanilla_end))
         print "finished vanilla in", vanilla_end, "seconds"
 
+    def run_two_approx(edge, commodity, omega):
         two_approx_start = time.time()
         try:
             spc, iterations = two_approx(edge, commodity, omega)
@@ -116,6 +117,7 @@ def run_multiple(numNodes, numEdges, numCommodities, omegas,
         outData['two_approx'].append((spc, iterations, two_approx_end))
         print "finished two_approx in", two_approx_end, "seconds"
 
+    def run_karakosta(edge, commodity, omega):
         karakosta_start = time.time()
         try:
             spc, iterations = maximum_concurrent_flow(edge, commodity,
@@ -126,6 +128,7 @@ def run_multiple(numNodes, numEdges, numCommodities, omegas,
         outData['karakosta'].append((spc, iterations, karakosta_end))
         print "finished karakosta in", karakosta_end, "seconds"
 
+    def run_two_approx_karakosta(edge, commodity, omega):
         two_approx_karakosta_start = time.time()
         try:
             spc, iterations = two_approx(edge, commodity, omega, karakosta=True)
@@ -135,6 +138,16 @@ def run_multiple(numNodes, numEdges, numCommodities, omegas,
         outData['two_approx_karakosta'].append((spc, iterations,
                                                 two_approx_karakosta_end))
         print "finished two_approx_karakosta in", two_approx_karakosta_end, "seconds"
+
+    def individual_loop(edge, commodity, omega):
+        if heuristic == "vanilla":
+            run_vanilla(edge, commodity, omega)
+
+        else:
+            run_vanilla(edge, commodity, omega)
+            run_two_approx(edge, commodity, omega)
+            run_karakosta(edge, commodity, omega)
+            run_two_approx_karakosta(edge, commodity, omega)
 
     for idx in range(10):
         print "ITERATION", idx
@@ -233,11 +246,11 @@ def generate_csv(pkl_file_name):
 if __name__ == '__main__':
     test = raw_input()
     if test == "0":
-        run_multiple([50, 100, 150, 200], 4, 10, 0.1, [4, 3, 3])
+        run_multiple([50, 100, 150, 200], 4, 10, 0.3, [4, 3, 3], heuristic="vanilla")
     elif test == "1":
-        run_multiple(100, 400, 10, [1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05], [4, 3, 3])
+        run_multiple(10, 40, 10, [1, 0.5, 0.4, 0.3, 0.2, 0.1, 0.05], [4, 3, 3], heuristic="vanilla")
     elif test == "2":
-        run_multiple(10, 40, [10, 20, 40, 80], 0.1, [.4, .3, .3])
+        run_multiple(10, 40, [5, 10, 15], 0.1, [.6, .4], heuristic="vanilla")
     elif test == "3":
-        run_multiple(100, 400, 10, 0.1, [[10], [5, 5], [4, 3, 3], [1] * 10])
+        run_multiple(100, 400, 10, 0.1, [[10], [5, 5], [4, 3, 3], [1] * 10], heuristic="vanilla")
 
