@@ -38,7 +38,7 @@ $f\in \mathcal{F}$ as follows:
 \text{max     } \lambda \\
 \text{s.t. }\sum_{f\in \mathcal{F}}f_e\cdot x(f) \leq c(e) \;\;\forall\;
 e\in E \\
-\sum_{f\in \cal{F}_j} x(f)\geq \lambda \;\;\;\forall\; 1\leq j\leq k \\
+\sum_{f\in \mathcal{F}_j} x(f)\geq \lambda \;\;\;\forall\; 1\leq j\leq k \\
 x\geq 0,\; \lambda\geq 0.
 \end{align*}
 Where $f_e$ is defined as the amount of flow that $f$ sends across edge $e$. In this case, $x(f)$ is defined as the fractional amount of times we use the
@@ -83,7 +83,7 @@ well for solving one variant of a multi-commodity flow problem can
 easily be extended to other multi-commody flow variants. Because of this, in discussing the background of maximum concurrent flow (MCF),
 we will describe the background of min-cost multi-commodity flow
 (MCMCF) which has typically been the problem on which most of the
-following techniques were first developed. Keep in mind that FPAS'
+following techniques were first developed. Keep in mind that FPAS's
 for MCMCF are easily extensible to MCF, often using the same tricks,
 both in theory and to speed up implmentation in
 practice.

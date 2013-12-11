@@ -1,21 +1,16 @@
 \relax 
-\providecommand\hyper@newdestlabel[2]{}
-\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
-\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
-\global\let\oldcontentsline\contentsline
-\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
-\global\let\oldnewlabel\newlabel
-\gdef\newlabel#1#2{\newlabelxx{#1}#2}
-\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
-\AtEndDocument{\ifx\hyper@anchor\@undefined
-\let\contentsline\oldcontentsline
-\let\newlabel\oldnewlabel
-\fi}
-\fi}
-\global\let\hyper@last\relax 
-\gdef\HyperFirstAtBeginDocument#1{#1}
-\providecommand\HyField@AuxAddToFields[1]{}
-\providecommand\HyField@AuxAddToCoFields[2]{}
+\ifx\hyper@anchor\@undefined
+\global \let \oldcontentsline\contentsline
+\gdef \contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global \let \oldnewlabel\newlabel
+\gdef \newlabel#1#2{\newlabelxx{#1}#2}
+\gdef \newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\let \contentsline\oldcontentsline
+\let \newlabel\oldnewlabel}
+\else
+\global \let \hyper@last\relax 
+\fi
+
 \citation{goldberg}
 \citation{garg}
 \@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}}
@@ -29,7 +24,7 @@
 \citation{garg}
 \@writefile{toc}{\contentsline {section}{\numberline {III}Algorithm}{3}{section.3}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {III-A}Presentation of algorithm}{3}{subsection.3.1}}
-\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces GARG-MCF without heuristics}}{4}{algocf.1}}
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces GARG-MCF without heuristics}}{4}{algocfline.1}}
 \@writefile{toc}{\contentsline {section}{\numberline {IV}Analysis}{4}{section.4}}
 \citation{karakostas}
 \@writefile{toc}{\contentsline {subsection}{\numberline {IV-A}Approximation Ratio}{5}{subsection.4.1}}
@@ -45,11 +40,11 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {VI-B}Dependence on the parameter $k$}{7}{subsection.6.2}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {VI-C}Dependence on the parameter $n$}{7}{subsection.6.3}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {VI-D}Dependence on the distribution}{7}{subsection.6.4}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Plots of number of shortest-path computations versus error term $\omega $ for all heuristics}}{8}{figure.1}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Plots of number of shortest-path computations versus number of commodities $k$ for all heuristics}}{8}{figure.2}}
-\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusions}{8}{section.7}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Plots of number of shortest-path computations versus number of nodes for all heuristics}}{9}{figure.3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Plots of number of shortest-path computations versus number of nodes for all heuristics}}{9}{figure.4}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusions}{7}{section.7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Plots of number of shortest-path computations versus error term $\omega $ for all heuristics. This data was obtained from running our algorithm, with the respective heuristics activated, on graphs with $100$ nodes, $400$ directed edges, 10 commodities (split into two groups of size 6 and 4 that shared the same source) on 10 different random graphs. Of the 10 measured shortest path computations for each $\omega $, we dropped the minimum and maximum, and reported the average over the remaining.}}{8}{figure.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Plots of number of shortest-path computations versus number of commodities $k$ for all heuristics. This data was obtained from running our algorithm, with the respective heuristics activated, on graphs with $100$ nodes, $400$ directed edges, and a error margin of $10\%$, 10 times. }}{8}{figure.2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Plots of number of shortest-path computations versus number of nodes for all heuristics. This data was obtained from running our algorithm, with the respective heuristics activated, 10 commodities (split into two groups of size 6 and 4 that shared the same source), and an error margin of $10\%$, 10 times. We construct our graphs such that the number of edges is always four times the number of nodes. }}{9}{figure.3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Plots of number of shortest-path computations versus number of nodes for all heuristics.This data was obtained from running our algorithm, with the respective heuristics activated, on graphs with $100$ nodes, $400$ directed edges, 10 commodities, 10 times. Each time, we vary the distribution of commodities that share the same source.}}{9}{figure.4}}
 \bibstyle{plain}
 \bibdata{references}
 \bibcite{garg}{1}
