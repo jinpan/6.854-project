@@ -27,6 +27,13 @@ with the following experiments.
 
 \subsection{Dependence on the parameter $\omega$}
 
+\begin{figure*}
+\begin{center}
+\mbox{\includegraphics[width=0.8\textwidth]{figures/omegas.png}}
+\caption{Plots of number of shortest-path computations versus error
+  term $\omega$ for all heuristics}
+\end{center}
+\end{figure*}
 In theory, the Garg-MCE algorithm runs with a quadratic dependence on $\omega$, which we observe in practice, both in
 terms of number of calls to our shortest paths function, and also wall time.
 
@@ -47,9 +54,15 @@ decimals render testing smaller values of $\omega$ infeasible.
 We include data on physical time performance in the appendix.
 
 \subsection{Dependence on the parameter $k$}
+\begin{figure*}
+\begin{center}
+\mbox{\includegraphics[width=0.8\textwidth]{figures/commodities.png}}
+\caption{Plots of number of shortest-path computations versus number
+  of commodities $k$ for all heuristics}
+\end{center}
+\end{figure*}
 
 The Garg-MCE algorithm has a linear dependence on k, and the Karakostas heuristic absorbs this factor.
-
 % INSERT FIGURE
 This data was obtained from running our algorithm, with the respective heuristics activated, on graphs with $100$
 nodes, $400$ directed edges, and a error margin of $10\%$, 10 times.
@@ -58,6 +71,14 @@ Again, we observe our vanilla implementation outperforming the implementation wi
 heuristic outperforming both, and the two-approximation having similar performance.
 
 \subsection{Dependence on the parameter $n$}
+\begin{figure*}
+\begin{center}
+\mbox{\includegraphics[width=0.8\textwidth]{figures/nodes.png}}
+\caption{Plots of number of shortest-path computations versus number
+  of nodes for all heuristics}
+\end{center}
+\end{figure*}
+
 
 Our algorithm has a quadratic dependence on the number of edges, comparable to the number of nodes, given our sparse
 graph.  We expect there to be a linear dependence of the number of shortest path calls on the number of nodes.
@@ -70,6 +91,14 @@ A surprising result is that this dependence is experimentally not very strong fo
 the number of calls to shortest paths does not necessarily increase with an increase in graph size.
 
 \subsection{Dependence on the distribution}
+
+\begin{figure*}
+\begin{center}
+\mbox{\includegraphics[width=0.8\textwidth]{figures/distribution.png}}
+\caption{Plots of number of shortest-path computations versus number
+  of nodes for all heuristics}
+\end{center}
+\end{figure*}
 
 Our algorithm does not strictly depend on how the commodities are distributed, but the Karakostas heuristic takes
 advantage of multiple commodities that start at the same source. We expect the Karakostas heuristic to significantly

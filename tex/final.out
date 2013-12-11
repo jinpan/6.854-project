@@ -1,0 +1,19 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Background}{}% 2
+\BOOKMARK [1][-]{section.3}{Algorithm}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Presentation of algorithm}{section.3}% 4
+\BOOKMARK [1][-]{section.4}{Analysis}{}% 5
+\BOOKMARK [2][-]{subsection.4.1}{Approximation Ratio}{section.4}% 6
+\BOOKMARK [2][-]{subsection.4.2}{Scaling Beta}{section.4}% 7
+\BOOKMARK [2][-]{subsection.4.3}{Running time}{section.4}% 8
+\BOOKMARK [1][-]{section.5}{Heuristics}{}% 9
+\BOOKMARK [2][-]{subsection.5.1}{2-approximation for Beta estimation}{section.5}% 10
+\BOOKMARK [2][-]{subsection.5.2}{Karakostas' method for shared sources}{section.5}% 11
+\BOOKMARK [2][-]{subsection.5.3}{Removal of demand-scaling}{section.5}% 12
+\BOOKMARK [1][-]{section.6}{Experimental Results}{}% 13
+\BOOKMARK [2][-]{subsection.6.1}{Dependence on the parameter }{section.6}% 14
+\BOOKMARK [2][-]{subsection.6.2}{Dependence on the parameter k}{section.6}% 15
+\BOOKMARK [2][-]{subsection.6.3}{Dependence on the parameter n}{section.6}% 16
+\BOOKMARK [2][-]{subsection.6.4}{Dependence on the distribution}{section.6}% 17
+\BOOKMARK [1][-]{section.7}{Conclusions}{}% 18
+\BOOKMARK [1][-]{section*.1}{References}{}% 19

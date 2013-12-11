@@ -1,0 +1,128 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+
+\documentclass[letterpaper, 12 pt, conference]{ieeeconf}  % Comment this line out
+                                                          % if you need a4paper
+%\documentclass[a4paper, 10pt, conference]{ieeeconf}      % Use this line for a4
+                                                          % paper
+
+\IEEEoverridecommandlockouts                              % This command is only
+                                                          % needed if you want to
+                                                          % use the \thanks command
+\overrideIEEEmargins
+% See the \addtolength command later in the file to balance the column lengths
+% on the last page of the document
+\setlength{\textfloatsep}{8pt plus 1.0pt minus 2.0pt}
+\setlength{\floatsep}{8pt plus 1.0pt minus 2.0pt}
+\usepackage[margin=0.6in]{geometry}
+
+%\usepackage[margin=0.5in]{geometry}
+\usepackage{times}
+\usepackage[usenames,dvips]{color}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage[tight]{subfigure}
+\usepackage{cite}
+\usepackage[vlined,linesnumbered,ruled]{algorithm2e}
+\usepackage{color}
+%\usepackage{smallcaptions}
+\usepackage{bm}
+\usepackage[tight]{subfigure}
+\usepackage{amsfonts,amsmath,amssymb}
+\usepackage[tight]{subfigure}
+\usepackage{cite}
+\usepackage[vlined,linesnumbered,ruled]{algorithm2e}
+\usepackage{flushend}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{xspace}
+\usepackage{bm}
+\usepackage{tabularx}
+% For table
+\usepackage{multirow}
+\usepackage{booktabs} % For rules in tables
+
+\usepackage{stmaryrd}
+\usepackage{verbatim}
+
+\def\vec#1{{\bf #1}}
+\def\S{{\mathbb{S}}}
+\def\S2{{\mathbb{S}^2}}
+\def\S3{{\mathbb{S}^3}}
+% The following packages can be found on http:\\www.ctan.org
+%\usepackage{graphics} % for pdf, bitmapped graphics files
+%\usepackage{epsfig} % for postscript graphics files
+%\usepackage{mathptmx} % assumes new font selection scheme installed
+%\usepackage{times} % assumes new font selection scheme installed
+%\usepackage{amsmath} % assumes amsmath package installed
+%\usepackage{amssymb}  % assumes amsmath package installed
+
+\title{\LARGE \bf Implementation of a Combinatorial Maximum Concurrent Flow Algorithm
+}
+
+\author{Matt Jordan and Jin Pan
+}
+\begin{document}
+
+
+
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+
+\input{abstract}
+\input{introduction}
+\input{background}
+\input{algorithm}
+\input{heuristics}
+\input{results}
+
+\input{conclusions}
+
+\addtolength{\textheight}{-12cm}   % This command serves to balance the column lengths
+                                  % on the last page of the document manually. It shortens
+                                  % the textheight of the last page by a suitable amount.
+                                  % This command does not take effect until the next page
+                                  % so it should come on the page before the last. Make
+                                  % sure that you do not shorten the textheight too much.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Appendixes should appear before the acknowledgment.
+
+%\section*{ACKNOWLEDGMENT}
+%The preferred spelling of the word ÒacknowledgmentÓ in America is without an ÒeÓ after the ÒgÓ. Avoid the stilted expression, ÒOne of us (R. B. G.) thanks . . .Ó  Instead, try ÒR. B. G. thanksÓ. Put sponsor acknowledgments in the unnumbered footnote on the first page.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%References are important to the reader; therefore, each citation must be complete and correct. If at all possible, references should be commonly available publications.
+
+
+
+
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+
+\input{appendix}
+
+
+\end{document}

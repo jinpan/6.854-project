@@ -1,12 +1,18 @@
 % Abstract
-
+\begin{abstract}
 \noindent Maximum Concurrent Flow (MCF) is used in a wide range of optimization
 problems where one needs to send multiple commodities concurrently
 across a network to meet a set of demands. In particular, MCF
 optimizes the minimum fraction of the how much any one commodity is
-satisfied. Here, we implement Garg's combinatorial MCF algorithm and analyze how
-various heuristics affect theoretical and experimental runtime.  We
-also offer a novel heuristic based on sloppy beta scaling and
-demonstrate better experimental runtime.
-
+satisfied. Here, we implement a fully polynomial approximation scheme
+for MCF first introduced by Garg. We summarize the algorithm and
+analysis and discuss various heuristics that affect theoretical and
+experimental runtime. We offer a novel heuristic based on sloppy $\beta$
+scaling that demonstrates better experimental runtime. We then present
+an implementation of this algorithm and these heuristics upon a series
+of randomly generated graphs to demonstrate the effect that
+varying parameters has upon runtime. We conclude that our
+implementation is indeed quadratic in the error term, and we observed
+that several heuristics offer useful speedups in practice.
+\end{abstract}
 

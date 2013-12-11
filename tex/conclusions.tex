@@ -1,3 +1,35 @@
 \section{Conclusions}
+Maximum Concurrent Flow has many applications where one needs to route
+mulitple commodities simultaneously across a network. Like other
+variants of multi-commodity flow, this can be solved exactly using
+linear programming methods, but in practice approxmiation algorithms
+are often good enough and run much more efficiently. In this paper we
+implemented a fully polynomial approximation scheme for solving MCF
+first introduced by Garg,
+quadratic in both error and the size of the graph (ignoring polylog
+factors), when appropriate heuristics are applied. We develop a novel
+heuristic that runs theoretically no slower than the original
+algorithm, as well as implementing a heuristic that reduces the
+algorithm's dependence on the number of commodities.
 
-That's all.
+Our results show that the number of shortest path computations is
+quadratic in the error term and is roughly linear in the number of
+commodities. The number of shortest path computations in the original
+algorithm also appears to be roughly linear in the number of
+edges. The technique first proposed by Karakostas to reduce dependence
+on $k$ has been shown to make fewer calls to the shortest paths
+subroutine than the vanilla implementation, particularly on problem
+instances where there is a large number of shared-source
+commodities. The two-approximation heuristic was implemented on top of
+Karakostas' algorithm, and we observed similar numbers of calls to the
+shortest path subroutine, implying that we do not see a dramatic
+decrease in runtime in practice from this heuristic, despite the
+theoretical benefits. Finally, we observed that our novel heuristic
+that did not scale demands unnecessarily outperformed the vanilla
+algorithm proposed by Garg in shortest paths computations and wall
+time. This leads to hypotheses that we could be sloppier with
+demand-scaling at the beginning of our algorithm and carefully
+scale-demands as we approach termination to further reduce the number
+of phases performed. 
+
+Our codebase can be downloaded from \href{https://github.com/jinpan/6.854-project}{https://github.com/jinpan/6.854-project}. 
