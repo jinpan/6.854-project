@@ -14,7 +14,7 @@ $$\lambda = \min_{j}(f_j/d(j))$$
 We remember that a feasible flow preserves capacity constraints: 
 $$\sum_j f_j(u,v) \leq c(u,v)$$
 where $f_j(u,v)$ represents the flow of commodity $j$ through edge
-$(u,v)$ for each edge $((u,v))\in E$, and maintains flow conservation:
+$(u,v)$ for each edge $(u,v)\in E$, and maintains flow conservation:
 $$\sum_{v\in V} f_j(u,v)=0$$ 
 for $v\neq s_j,t_j$, for all commodities $j$ and defining
 $f_j(u,v)=-f_j(v,u)$. Intuitively, we can describe the maximum
@@ -25,7 +25,7 @@ supply to demand for all commodities. This differs from other
 multicommodity flow variants, such as the maximum multi-commodity flow
 problem where the goal is to simply maximize total throughput from
 sources to sinks with no demands on each commodity. Maximizing the minimum ratio is often more desirable in practice,
-as this ensures that all commodities that can be filled will be at least partially filled.
+as this ensures that all commodities are partially satisfied to some ratio, instead of an uneven satisfaction of demands.
 
 Typically the problem of maximum concurrent flow is formulated under the context of a linear
 program. If we let $\mathcal{F}_j$ be the set of flows that send $d(j)$ units
@@ -36,7 +36,7 @@ formulate a linear program with a variable $x(f)$ for each element
 $f\in \mathcal{F}$ as follows:
 \begin{align*}
 \text{max     } \lambda \\
-\text{s.t. }\sum_{f\in \cal{F}}f_e\cdot x(f) \leq c(e) \;\;\forall\;
+\text{s.t. }\sum_{f\in \mathcal{F}}f_e\cdot x(f) \leq c(e) \;\;\forall\;
 e\in E \\
 \sum_{f\in \cal{F}_j} x(f)\geq \lambda \;\;\;\forall\; 1\leq j\leq k \\
 x\geq 0,\; \lambda\geq 0.
@@ -54,8 +54,8 @@ $\mathcal{P}_j$ be the set of paths starting at $s_j$ and ending at
 $t_J$.
 Then we can define $\mathcal{P}$ to be the union of $\mathcal{P}_j$
 for all $j$, that is, $\mathcal{P}$ is the set of all paths from $s_j$
-to $t_j$ for any $j$. Let $\mathcal{P}_e$ be the set of paths in
-$\mathcal{P}$ such that edge $e$ is in the path. Then our LP
+to $t_j$ for any $j$. Let $\mathcal{P}_e$ be the set of paths $p$ in
+$\mathcal{P}$ such that edge $e$ is in the $p$. Then our LP
 formulation assigns a variable $x(p)$ for each path $p\in \mathcal{P}$
 and has the following description:
 \begin{align*}
@@ -80,8 +80,7 @@ multi-commodity flow problems and their variants arose in the early
 Typically, variants of multi-commodity flow problems have often been
 solved with similar techniques. That is, the tricks that tend to work
 well for solving one variant of a multi-commodity flow problem can
-easily be extended to other multi-commody flow variants. For this
-reason, in discussing the background of maximum concurrent flow (MCF),
+easily be extended to other multi-commody flow variants. Because of this, in discussing the background of maximum concurrent flow (MCF),
 we will describe the background of min-cost multi-commodity flow
 (MCMCF) which has typically been the problem on which most of the
 following techniques were first developed. Keep in mind that FPAS'
@@ -94,6 +93,7 @@ after the development of the theoretical development of
 the first FPAS's that an efficient implementation was developed,
 attaining a speed two-to-three orders of magnitude faster than
 state-of-the-art linear program solvers \cite{goldberg}.
+
 The main idea of how
 these early FPAS' work is a rerouting method, generalizing on
 fractional packing techniques \cite{karger}.
@@ -101,7 +101,7 @@ Initially, the
 algorithm finds an initial flow satisfying the demands, but possibly
 violating the capacities. Then the algorithm repeatedly
 picks a commodity via round-robin fashion and reroutes flow using a
-single-commodity minimum-cost flow in the auxiliary graph until the flow is feasible. The costs
+single-commodity minimum-cost flow subroutine on the auxiliary graph until the flow is feasible. The costs
 on the edges of the auxiliary graph are initialized to a small value,
 but are scaled for every unit of flow rerouted through them, ultimately
 making the cost of an edge exponential in the amount of flow sent
@@ -111,7 +111,7 @@ $\tilde{O}(\omega^{-3}kmn)$ time for the minimum cost multi-commodity flow
 problem \cite{karger}. 
 Since then, these bounds have since been increased to
 $\tilde{O}(\omega^{-2}m^2)$ in 2000 \cite{grig}. 
-Most recently, Jonathon Kelner of MIT proposed a method to find an $\omega$ approximate concurrent multicommodity flow problem
+Most recently, Jonathon Kelner of MIT proposed a method to find an $\omega$ approximate maximum concurrent multicommodity flow problem
 in  $O(m^{1+o(1)}\omega^{-2}k^2)$ time
 using a combination of a
 non-Euclidean generalization of gradient descent, flow sparsifiers,

@@ -5,12 +5,12 @@ from their respective sources to their respective sinks along a
 directed graph. It also requires that the net flow across all commodities on any
 single edge does not exceed the capacity of that edge and that flow is conserved. Multicommodity
 flow problems arise in many different contexts where distinct
-resources need to be routed across a network. For example,
+resources need to be concurrently routed across a network. For example,
 multicommodity flow problems are solved when routing across
 communication networks or determining routing of goods across a transportation network.
 
 Historically, this problem and its many variants have been solved by
-formulating the problem as a large linear program. This allows us to
+formulating the problem as a large linear program \cite{goldberg}. This allows us to
 use the multitude of linear programming
 algorithms to solve this problem exactly in polynomial time. The
 structure of this problem has been used to modify

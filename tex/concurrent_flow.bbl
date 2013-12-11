@@ -14,8 +14,8 @@ Andrew~V Goldberg, Jeffrey~D Oldham, Serge Plotkin, and Cliff Stein.
 
 \bibitem{grig}
 Michael~D Grigoriadis and Leonid~G Khachiyan.
-\newblock Approximate minimum-cost multicommodity flows in $\tilde{O}(\epsilon-
-  2 knm)$ time.
+\newblock Approximate minimum-cost multicommodity flows in
+  $\tilde{O}(\epsilon^{-2} knm)$ time.
 \newblock {\em Mathematical Programming}, 75(3):477--482, 1996.
 
 \bibitem{networkx}

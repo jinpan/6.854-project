@@ -1,15 +1,19 @@
 
 \SetAlgoSkip{}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}[h!] \small
+\begin{algorithm}[H] \small
 $G \leftarrow (V,E)$\;
 $\epsilon,\delta \leftarrow \mathrm{calculate\_epsilon}(\omega),\mathrm{calculate\_delta}(\omega)$\;
 \For{ $e \in E$}{
   $l(e)=\delta / c(e)$\;
 }
-
-
+$\mathrm{scale\_demands}(\frac{k}{z})$\;
+$phase\_since\_rescale \leftarrow 0$\;
 \While{$D(l)<1$}{
+  \If{ $phase\_since\_rescale>T$}{
+  $\mathrm{scale\_demands}(2)$\;
+  $phase\_since\_rescale \leftarrow 0$\;
+}
   \For{ $j = 1$ to $k$}{
     $d_j \leftarrow d(j)$\;
     \While{$d_j \neq 0$} {
@@ -27,6 +31,7 @@ $\epsilon,\delta \leftarrow \mathrm{calculate\_epsilon}(\omega),\mathrm{calculat
 
       }
     }
+    $phase\_since\_rescale +=1$\;
 }
 $scale\_factor \leftarrow \log_{1+\epsilon}\delta^{-1}$\;
 \For{$e\in E$}{
