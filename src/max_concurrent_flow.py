@@ -2,6 +2,7 @@
 Maximum concurrent flow solver using the iterative method on the dual of MCF
 as described in http://cgi.csc.liv.ac.uk/~piotr/ftp/mcf-jv.pdf
 '''
+from math import e
 from math import log
 import math
 import networkx as nx
@@ -36,8 +37,7 @@ class Commodity(object):
 
 
 def scale_demands(commodities, scaleFactor):
-    '''
-    Scales each demand commodities by multiplying by scaleFactor
+    ''' Scales each demand commodities by multiplying by scaleFactor
     '''
     for commodity in commodities:
         commodity.demand *= scaleFactor
@@ -144,6 +144,16 @@ def calculate_z(G, commodities):
     return min(zList)
 
 
+def calculate_L(G):
+    lengths = {}
+    for head in G.node.iterkeys():
+        for tail in G.edge[head].iterkeys():
+            lengths[tail] = max(lengths.get(tail, 0),
+                                lengths.get(head, 0) + 1)
+
+    return max(lengths.itervalues())
+
+
 def calculate_demand_ratios(commodities, demands=None):
     '''
     Takes in a list of commodities and demands.  If demands are not given,
@@ -157,8 +167,9 @@ def calculate_demand_ratios(commodities, demands=None):
 
 
 def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
-                            scale_beta=False, returnBeta=False,
-                            karakosta = False, shortestPathComputations=0):
+                            scale_beta=True, returnBeta=False,
+                            karakosta=False, multi_route=False, beta_hat=None,
+                            shortestPathComputations=0):
     '''
     Takes in an iterable of edges and commodities and calculates the maximum
     concurrent flow
@@ -178,13 +189,19 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
     #construct graph
     G = construct_graph(edges)
     
+    if multi_route:
+        L = calculate_L(G)
+        total_flow = 0
+
     #calculate z and scale demands
     if scale_beta:
         z = calculate_z(G, commodities)  # z is minimum of shortest paths
         k = float(len(commodities))  # k is number of commodities
         t = 2 * (1. / epsilon) * log(len(edges) / (1 - epsilon)) / log(1 + epsilon)
         t = int(t)  # t is iteration threshold
-        scale_demands(commodities, k/z)  # so z/k is 1
+        scale_demands(commodities, z/k)  # so z/k is 1
+        z = calculate_z(G, commodities)
+        assert (abs(1 - z/k) < FP_ERROR_MARGIN)
     
     count = -1
     #start iterations
@@ -205,10 +222,11 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
     old_objective = -1
     while True:  # phases
         current_objective = calculate_dual_objective(G)
-        if current_objective >= 1: break
+        if current_objective >= 1 and not multi_route:
+            break
 
         if old_objective >= calculate_dual_objective(G):
-            raise Exception
+            break
         else:
             old_objective = current_objective
 
@@ -260,7 +278,32 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
                     head, tail = identifier
                     edge = G.edge[head][tail]
                     edge[LENGTH_ATTRIBUTE] = edge[LENGTH_ATTRIBUTE] * (1 + epsilon * flow / edge[CAPACITY_ATTRIBUTE])
-        else:  # if not karakosta
+
+        elif multi_route:
+
+            for commodity in commodities:
+                source, sink, demand = commodity.source, commodity.sink, commodity.demand
+
+                max_length = L * delta * e ** (epsilon * total_flow / beta_hat)
+                if max_length >= 1:
+                    break
+
+                all_paths = nx.all_simple_paths(G, source, sink)
+                shortestPathComputations += 1
+                paths = [get_edges(G, path) for path in all_paths]
+                paths = filter(lambda path: sum([edge[LENGTH_ATTRIBUTE] for edge in path]) <= max_length, paths)
+
+                for idx, path in enumerate(paths):
+                    min_cap = min([edge[CAPACITY_ATTRIBUTE] for edge in path])
+                    added_flow = min_cap * demand
+                    total_flow += added_flow
+
+                    for edge in path:
+                        edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + added_flow
+                        edge[LENGTH_ATTRIBUTE] = edge[LENGTH_ATTRIBUTE] * (1 + epsilon * added_flow / edge[CAPACITY_ATTRIBUTE])
+
+
+        else:  # if not karakosta and multi_route
             for commodity in commodities:  # iterations
                 d_j = commodity.demand
 
@@ -273,19 +316,59 @@ def maximum_concurrent_flow(edges, commodities, error=GLOBAL_ERROR,
                     for edge in sp:
                         edge[FLOW_ATTRIBUTE] = edge.get(FLOW_ATTRIBUTE, 0) + added_flow
                         edge[LENGTH_ATTRIBUTE]= edge[LENGTH_ATTRIBUTE] * (1 + epsilon * added_flow / edge[CAPACITY_ATTRIBUTE])
+
                 
     if returnBeta:  # returns beta value, not edge_dict, used in 2-approx
         return shortestPathComputations, calculate_dual_objective(G) / calculate_alpha(G, commodities)
-    # scale by log_(1+e) (1+e)
+
+    if multi_route:
+        # scale by max capacity/flow ratio
+        ratios = []
+        for head, datum in G.edge.iteritems():
+            for tail, edge_dict in datum.iteritems():
+                ratios.append(float(edge_dict.get(FLOW_ATTRIBUTE, 0) / edge_dict[CAPACITY_ATTRIBUTE]))
+        ratio = 1. / max(ratios)
+
+        for head, datum in G.edge.iteritems():
+            for tail, edge_dict in datum.iteritems():
+                edge_dict[FLOW_ATTRIBUTE] = edge_dict.get(FLOW_ATTRIBUTE, 0) * ratio
+
+    else:
+        # scale by log_(1+e) (1+e)
+        for head in G.edge.iterkeys():
+            for tail, edge_dict in G.edge[head].iteritems():
+                edge_dict[FLOW_ATTRIBUTE] = edge_dict.get(FLOW_ATTRIBUTE, 0) / (log(1. / delta) / log(1 + epsilon))
+
+    commodityTable = {}
+    for commodity in commodities:
+        commodityTable[commodity] = 0
     for head in G.edge.iterkeys():
         for tail, edge_dict in G.edge[head].iteritems():
-            edge_dict[FLOW_ATTRIBUTE] = edge_dict.get(FLOW_ATTRIBUTE, 0) / (log(1. / delta) / log(1 + epsilon))
+            for commodity in commodities:
+                if tail == commodity.sink: 
+                    commodityTable[commodity]+=edge_dict[FLOW_ATTRIBUTE]/commodity.demand
+            
+    print "Lambda is " + str( min([x for x in commodityTable.itervalues()]))
+    print "OBJECTIVE: ", calculate_dual_objective(G)
     print "SPC-"+str(karakosta)+"-"+str(twoApprox)+ " for G(" + str(len(G.node.keys()))+","+str(len(edges))+") w/ error " + str(error)+ ": " + str(shortestPathComputations)
+    for node in G.node.iterkeys():
+        print node, G.edge[node]
     return shortestPathComputations,count
 
 
-def two_approx(edges, commodities, error=GLOBAL_ERROR, karakosta=False):
-    spc, beta_hat = maximum_concurrent_flow(edges, commodities, error=1., returnBeta=True, karakosta=karakosta)
+def get_beta_hat(edges, commodities, error=GLOBAL_ERROR, karakosta=True):
+    spc, beta_hat = maximum_concurrent_flow(edges, commodities, error=1., returnBeta=True, karakosta=karakosta,
+                                            scale_beta=False)
+    return beta_hat, spc
+
+
+def two_approx(edges, commodities, error=GLOBAL_ERROR, karakosta=True):
+    beta_hat, spc = get_beta_hat(edges, commodities, error=1., returnBeta=True, karakosta=karakosta)
     scale_demands(commodities, beta_hat / 2.)
-    return maximum_concurrent_flow(edges, commodities, error=error, scale_beta=False, karakosta=karakosta, shortestPathComputations=spc)
+    return maximum_concurrent_flow(edges, commodities, error=error, karakosta=karakosta, shortestPathComputations=spc)
+
+def multi_route(edges, commodities, error=GLOBAL_ERROR, scale_beta=True, karakosta=False):
+    beta_hat, spc = get_beta_hat(edges, commodities, error=1.)
+    return maximum_concurrent_flow(edges, commodities, error=error, karakosta=karakosta, shortestPathComputations=spc,
+                                   scale_beta=scale_beta, multi_route=True, beta_hat=beta_hat)
 
