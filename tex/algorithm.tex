@@ -3,7 +3,7 @@
 Avoiding the complicated methods of the most recent publication
 improving the bounds for maximum concurrent flow, we choose to
 implement the maximum concurrent flow FPAS presented by Garg and
-K\"{o}nemann, and several heuristics to speed up runtime in
+K\"{o}nemann and several heuristics to speed up runtime in
 practice. The basic implementation gives a runtime of
 $\tilde{O}(\omega^{-2}(k+m)m)$ for the MCF problem \cite{garg}. The dependency on $k$
 can be removed with
@@ -18,14 +18,14 @@ the capacity of that edge. We repeatedly satisfy the
 demand of each commodity by sending as much flow as we can
 (independently) along the
 shortest path from the source to the sink, where shortest is dependent
-upon the 'length' function. Then we scale the 'length' of each edge by
+upon the `length' function. Then we scale the `length' of each edge by
 a factor dependent upon the amount of flow we just sent across it. In
-this way, the 'length' is exponential in the amount of flow being sent
+this way, the `length' is exponential in the amount of flow being sent
 across the edge. Intuitively, since we call shortest paths based on
 this length function, this causes us to spread our flow across edges
 and reroute in such a fashion that doesn't force all our flow on one
-path. We stop after the length functions grow 'large enough'. The
-precise definition of 'large enough' and that this computes a $1+\omega$ approximation is not
+path. We stop after the length functions grow `large enough'. The
+precise definition of `large enough' and that this computes a $1+\omega$ approximation is not
 entirely obvious, but is believable under the context of the
 analysis. We will be more formal in how Garg-MCF works
 now.
@@ -64,7 +64,7 @@ consider commodity $j$ and reroute $d(j)$ units of flow from $s_j$ to
 $t_j$. We do this with a series of steps, updating the length after each step. Let $l_{i,j}^s$ refer to the
 length function at the $i^{th}$ phase, the $j^{th}$ iteration,
 directly after the $s^{th}$ step. Then during each step, we compute the minimum cost
-path from $s_j$ to $t_j$ under this length function,$l_{i,j}^s$ and route as much
+path from $s_j$ to $t_j$ under this length function, $l_{i,j}^s$, and route as much
 flow along that path as possible. That is, we wish to route a total of
 $d(j)$ flow from $s_j$ to $t_j$ over all steps during an iteration, so
 let $d^s$ refer to flow remaining to be rerouted during an
@@ -158,9 +158,7 @@ more than $1+\epsilon$ at termination, since we terminate as soon as
 $\sum_el(e)c(e)\geq 1$ and we scale each edge by no more than
 $1+\epsilon$ each time we scale. Thus, if we set $\delta$ to $(m/(1-\epsilon))^{-1/\epsilon}$, the number of steps is at most
 $m\log_{1+\epsilon}\frac{m}{1-\epsilon}$ plus the number of
-iterations. Putting this all together, we end up with a runtime of 
+iterations. Putting this all together, we have a runtime of 
 $$O(\omega^{-2}(k\log m+m)\log m)T_{sp})$$ where $T_{sp}$ is the time to
 compute a single-source shortest path subroutine.
-
-
 

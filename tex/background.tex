@@ -24,7 +24,8 @@ bare minimum of demand satisfaction, we want to maximize the ratio of
 supply to demand for all commodities. This differs from other
 multicommodity flow variants, such as the maximum multi-commodity flow
 problem where the goal is to simply maximize total throughput from
-sources to sinks with no demands on each commodity.
+sources to sinks with no demands on each commodity. Maximizing the minimum ratio is often more desirable in practice,
+as this ensures that all commodities that can be filled will be at least partially filled.
 
 Typically the problem of maximum concurrent flow is formulated under the context of a linear
 program. If we let $\mathcal{F}_j$ be the set of flows that send $d(j)$ units
