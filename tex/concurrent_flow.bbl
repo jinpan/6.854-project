@@ -18,6 +18,12 @@ Michael~D Grigoriadis and Leonid~G Khachiyan.
   2 knm)$ time.
 \newblock {\em Mathematical Programming}, 75(3):477--482, 1996.
 
+\bibitem{networkx}
+Aric~A. Hagberg, Daniel~A. Schult, and Pieter~J. Swart.
+\newblock Exploring network structure, dynamics, and function using {NetworkX}.
+\newblock In {\em Proceedings of the 7th Python in Science Conference
+  (SciPy2008)}, pages 11--15, Pasadena, CA USA, August 2008.
+
 \bibitem{karakostas}
 George Karakostas.
 \newblock Faster approximation schemes for fractional multicommodity flow
