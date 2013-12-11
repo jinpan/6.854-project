@@ -12,7 +12,10 @@ remainder of this section, we will describe the algorithm implemented
 in this paper (herein referred to as Garg-MCF), offering both
 pseudocode and a brief look at the analysis. \\
 The main idea behind Garg-MCF relies on the rerouting and fractional
-packing methods introduced in section 2. In plain english, we compute a $(1+\omega)$ approxmation as follows. We start by assigning a 'length' to each edge
+packing methods introduced in section 2. In plain english, we compute
+a $(1+\omega)$ approxmation as follows. We start by adjusting the
+demands of each commodity such that the optimal solution to the LP is
+at least 1; this is done for the sake of the analysis. We proceed by assigning a 'length' to each edge
 dependent upon $\omega$ and
 the capacity of that edge. We repeatedly satisfy the
 demand of each commodity by sending as much flow as we can
@@ -24,7 +27,8 @@ this way, the `length' is exponential in the amount of flow being sent
 across the edge. Intuitively, since we call shortest paths based on
 this length function, this causes us to spread our flow across edges
 and reroute in such a fashion that doesn't force all our flow on one
-path. We stop after the length functions grow `large enough'. The
+path. We rescale the demands as we proceed to speed up runtime, but
+also maintain that the optimal $\lambda$ is at least 1. We stop after the length functions grow `large enough'. The
 precise definition of `large enough' and that this computes a $1+\omega$ approximation is not
 entirely obvious, but is believable under the context of the
 analysis. We will be more formal in how Garg-MCF works
@@ -55,9 +59,15 @@ constraint is tight, this LP can be viewed as the assignment of
 positive lengths to edges such that $\frac{D(l)}{\alpha(l)}$ is
 minimized. 
 
-With notation in hand, the algorithm runs as follows. We first assign
+With notation in hand, the algorithm runs as follows. We first scale
+the demands of each commodity in a fashion to ensure that the optimal
+value is at least 1. This scaling factor is referred to as
+$\frac{k}{z}$ with the derivation shown in the original paper. The exact mechanism by which this is done isn't
+as important as noticing that scaling the demands by a constant factor
+scales the value of $\lambda$ by the inverse of that constant
+factor. Next, we assign
 an initial length of $\delta/c(e)$ to each edge, where $\delta$ is carefully picked
-to make the analysis work out. Next we proceed in phases. For each
+to make the analysis work out. Then we proceed in phases. For each
 phase, we loop through each commodity $j$ in a series of $k$
 iterations, one for each commodity. For each $j^{th}$ iteration then, we
 consider commodity $j$ and reroute $d(j)$ units of flow from $s_j$ to
@@ -87,7 +97,12 @@ We terminate
 the iteration when $d_{i,j}^p=0$ for some step number $p$. We repeat
 this process for each commodity during an iteration, and we repeat
 phases until we reach our stopping condition, which we define when 
-$D(l_{i,j}^s)\geq 1$. We then have a graph that has flow along edges, but
+$D(l_{i,j}^s)\geq 1$, which is checked at the end of every
+phase. Also, upon completion of a certain number of phases, $T$, we can
+guarantee that the optimal value is greater than 2, so we can rescale
+the demands of each commodity by a factor of 2, and we maintain the
+invariant that the optimal value is at least 1. 
+Upon completion of the algorithm, we have a graph that has flow along edges, but
 almost surely overflows capacity bounds. We can scale the flow along each edge by
 dividing flow by $\log_{1+\epsilon}\delta^{-1}$, which makes the
 flow feasible. From here, we can calculate $\lambda$
@@ -96,7 +111,7 @@ final scale factor, $\log_{1+\epsilon}\delta^{-1}$, will be
 briefly described in the next section, and fully derived in the
 original paper. 
 For clarity, we present the pseudocode of this
-algorithm:
+algorithm in Algorithm 1.
 \input{pseudo}
 
 \section{Analysis}
@@ -123,11 +138,10 @@ our scaling factor is derived, and a lower bound for $\lambda$
 established dependent on the number of phases completed and
 $\epsilon$. 
 
-Now we can consider the ratio between $\lambda$ and the solution to
-D-MCF, since we have bounds on both terms. If we can show that
+Now we can consider the ratio between $\beta$ and $\lambda$, since we have bounds on both terms. If we can show that
 $\beta/\lambda\leq \text{poly}(\epsilon)$ then by weak duality we have
 that $\lambda \leq \beta$, so our computed $\lambda$ is within a
-factor of $\text{poly}(\epsilon)$ of $\beta$. Strong duality holds
+factor of $\text{poly}(\epsilon)$ of $\beta$. Strong duality implies
 that $\beta$ is the value of the optimal solution to MCF. With the
 math of the paper  we arrive at the claim that 
 $$\frac{\beta}{\lambda}\leq (1-\epsilon)^{-3}$$
@@ -137,7 +151,7 @@ we arrive at our desired $1+\omega$ approximation.
 \subsection{Scaling Beta}
 We now lift the previous assumption that $\beta\geq 1$. The key idea
 here is that by scaling all the demands by a constant factor, we also
-scale the value of the optimal $\lambda$, and therefore $\beta$. We
+scale the value of $\lambda$, and therefore $\beta$. We
 find bounds above and below for $\beta$ based on the current demand
 scheme, and then scale the demands such that the lower bound for
 $\beta$ is 1. It turns out that for any phase number $i$ in which the
@@ -148,17 +162,35 @@ phases to ensure that $\beta\geq 2$, a number we'll call $T$. In this case
 we scale demands of
 all commodities, effectively reducing $\beta$ by a factor of
 two. If the ratio of the upper bound and lower bound for $\beta$ was
-initially $c$, then we have to run for at most $T\log c$ phases.
+initially $c$, then we have to run for at most $T\log c$ phases. In
+the full proof, Garg showed that $c=m$, so we have to run for at most
+$T\log m$ phases.
 \subsection{Running time}
+
+
 The scaling of $\beta$ gives us a bound on the number of phases we
-must compute. In each phase, we compute $k$ iterations, so all that is
-left is to bound the number of steps per iteration. The key idea here
-is that $l(e)c(e)$ is $\delta$ for each edge $e$ initially, and no
+must compute. Since we compute $k$ iterations per phase, this also
+bounds the number of iterations we must complete. To compute runtime,
+we need to calculate the total number of steps we can perform. The key
+insight here is that there are two different types of steps: steps
+where we saturate an edge, and steps that do not. Notice that in each
+iteration, all steps saturate an edge, except the last step in the
+iteration. This is to say that for all but the last iteration, at
+least one edge has a length that is scaled by a factor of
+$1+\epsilon$. Also note that $l(e)c(e)$ is $\delta$ for each edge $e$
+initially, and no
 more than $1+\epsilon$ at termination, since we terminate as soon as
 $\sum_el(e)c(e)\geq 1$ and we scale each edge by no more than
-$1+\epsilon$ each time we scale. Thus, if we set $\delta$ to $(m/(1-\epsilon))^{-1/\epsilon}$, the number of steps is at most
-$m\log_{1+\epsilon}\frac{m}{1-\epsilon}$ plus the number of
-iterations. Putting this all together, we have a runtime of 
-$$O(\omega^{-2}(k\log m+m)\log m)T_{sp})$$ where $T_{sp}$ is the time to
+$1+\epsilon$ each time we scale. Thus, the total number of saturating
+steps is $m\log_{1+\epsilon}\delta^{-1}$. By setting $\delta$ to
+$(m/(1-\epsilon))^{-1/\epsilon}$, the number of saturating steps is at most
+$\frac{m}{\epsilon}\log_{1+\epsilon}\frac{m}{1-\epsilon}$. Since the
+total number of steps is the number of saturating steps plus the
+number of non-saturating steps, and the number of non-saturating steps
+is equivalent to the number of iterations, we have that the total
+number of steps is no more than 
+$T\log m+\frac{m}{\epsilon}\log_{1+\epsilon}\frac{m}{1-\epsilon}$. For
+appropriate choice of $\epsilon$ we combine these to show that we get
+a runtime of $(\omega^{-2}(k\log m+m)\log m)T_{sp})$ where $T_{sp}$ is the time to
 compute a single-source shortest path subroutine.
 

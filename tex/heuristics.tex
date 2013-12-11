@@ -1,15 +1,17 @@
 \section{Heuristics}
-In this section we present two  previously developed heuristics that don't speed up the
-theoretical running time but reduce the number of phases or shortest
-path computations in practice.
+In this section we present two  previously developed heuristics and
+one novel heuristic that reduces the number of phases or shortest
+path computations in practice, in addition to affecting the
+theoretical runtime.
 \subsection{2-approximation for Beta estimation}
 This heuristic allows us to greatly reduce the number of phases we
 perform by bounding $\beta$ between 1 and 2. To do this, we first
 compute a 2-approximation to the problem using $O(\log k \log m)$
 phases, and returns a $\hat{\beta}$ such that $\beta\leq \hat{\beta}\leq2\beta$. Then we don't have to scale demands using the above procedure
-and reduces the number of phases to $O(\log m(\log k+\epsilon^{-1}))$.
+and reduces the number of phases to $O(\log m(\log
+k+\epsilon^{-1}))$.%CHECK THIS
 
-\subsection{Karakosta's method for shared sources}
+\subsection{Karakostas' method for shared sources}
 This heuristic allows us to remove the depedence upon $k$, the number
 of commodities, using a technique first introduced by Karakostas \cite{karakostas}. 
 Since
@@ -27,3 +29,52 @@ factor of $1+\epsilon$ for each step except the last. The number of
 iterations then, is equivalent to the number of groups, which is at most
 $n$. Thus our runtime of $O(\omega^{-2}(k\log m+m)\log m T_{sp})$
 becomes $O(\omega^{-2}(n\log m+m)\log m T_{sp})$, or $\tilde{O}(w^{-2}m^2)$.
+\subsection{Removal of demand-scaling}
+This novel heuristic was developed to further simplify the algorithm
+and has been shown to provide a slight decrease in runtime in
+practice. The key idea here is that we consider whether or not it is
+possible for $\beta$ to be less than 1. If so, we do not do any
+demand-scaling. Otherwise, we scale demands as outlined in Garg-MCF. We can do this only under
+the provision that we do not check the termination condition until the
+end of each phase. We offer sketches of proofs that this heuristic can
+only improve runtime (in practice), and maintains a $(1+\omega)$
+approximation. 
+
+
+For runtime, we have that the runtime is equivalent to the number of
+steps times the time to compute a shortest path. Each step is either a
+saturating step, where we send flow such that an edge is saturated, or
+it isn't, in which case it is the last step of the iteration. Our
+bound on the number of saturating steps remains the same, by the same
+arguments presented in the above analysis. The number of unsaturating
+steps, however, depends on the number of phases, and therefore on the
+scaling of demands. Suppose that demand-scaling causes demands to
+decrease. Then each iteration routes less flow through, and since the total
+flow pushed through the graph upon termination is not dependent upon
+the scaling factor, this increases the number of non-saturating steps
+we have to perform. In other words, this scaling increases the number
+of iterations and therefore the runtime. If demand-scaling causes
+demands to increase, then by not doing demand scaling, we lose out on
+potential improvement, so we still scale demands in this case. Thus,
+we offer no changes to theoretical runtime, but show a runtime
+improvement in practice.
+
+It should be noted that the analysis presented by Garg assumed that
+$\beta\geq 1$, and this constraint is loosened by not scaling
+demands. We claim that, given an adjustment of the flow-scaling factor
+applied upon termination, we maintain a $(1+\omega)$
+approximation. Note that we only check the termination condition at
+the end of every phase. This implies that the ratios of flow sent for
+each commodity are constant (i.e., we send $d(j)$ flow of commodity
+$j$ for each phase if we don't scale, and $cd(j)$ flow of
+commodity $j$ each phase when we do scale, for scaling factor
+$c$). Thus we do not artificially increase the objective value by
+sending more flow to any one commodity, relative to the demand of that
+commodity. However, this relaxation breaks the analysis presented in
+Garg claiming that the flow-scaling factor returns the generated flow
+to feasibility. We remedy this by noting that the ratios of flow sent
+through a commodity to their demand is constant, and thus by
+not-scaling demands, we maintain the appropriate ratios of flows for a
+$(1+\omega)$ approximation. We return this flow to feasibility by
+simply finding the maximum overloaded edge $m$, and scaling the flow
+across all edges by the ratio of $c(m)$ to the flow through $m$. 
